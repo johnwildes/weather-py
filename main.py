@@ -15,6 +15,7 @@ import os
 from flask import Flask, request, jsonify
 import requests
 from dotenv import load_dotenv
+from datetime import datetime  # Add this import
 
 # Load environment variables from a .env file if it exists
 load_dotenv()
@@ -74,6 +75,10 @@ def get_forecast():
             f"</tr>"
             for day in forecast_days
         )
+
+        # Get the current date and time
+        current_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
         # Construct the full HTML response
         html_response = f"""
         <html>
@@ -97,6 +102,9 @@ def get_forecast():
                         {table_rows}
                     </tbody>
                 </table>
+                <footer class="text-center mt-4">
+                    <p>Current Date and Time: {current_datetime}</p>
+                </footer>
             </body>
         </html>
         """

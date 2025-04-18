@@ -1,3 +1,16 @@
+"""
+Weather Forecast Application
+
+This software provides a weather forecast service using the WeatherAPI. Users can retrieve a 10-day weather forecast by providing a ZIP code. The application supports both JSON responses for CLI tools and HTML responses for browsers.
+
+Author: John Wildes
+Contact: johnwildes@decklatedev.com
+
+License: Apache License 2.0
+Created with GitHub Copilot
+"""
+
+# Import necessary modules for Flask application, environment variable handling, and HTTP requests
 import os
 from flask import Flask, request, jsonify
 import requests
@@ -6,30 +19,36 @@ from dotenv import load_dotenv
 # Load environment variables from a .env file if it exists
 load_dotenv()
 
+# Initialize the Flask application
 app = Flask(__name__)
 
 @app.route('/forecast', methods=['GET'])
 def get_forecast():
+    # Retrieve the ZIP code from the request arguments
     zip_code = request.args.get('zip')
     if not zip_code:
-        # Retrieve the default ZIP code from the environment variable
+        # If no ZIP code is provided, try to use the default ZIP code from environment variables
         zip_code = os.getenv('DEFAULT_ZIP_CODE')
         if not zip_code:
+            # Return an error if neither a ZIP code nor a default is configured
             return jsonify({'error': 'ZIP code is required and no default is configured'}), 400
 
-    # Retrieve the API key from the environment variable or .env file
+    # Retrieve the API key for the weather service from environment variables
     api_key = os.getenv('WEATHER_API_KEY')
     if not api_key:
+        # Return an error if the API key is not configured
         return jsonify({'error': 'Weather API key is not configured'}), 500
 
+    # Construct the URL for the weather API request
     weather_api_url = f'http://api.weatherapi.com/v1/forecast.json?key={api_key}&q={zip_code}&days=10'
 
     try:
+        # Make the HTTP GET request to the weather API
         response = requests.get(weather_api_url)
-        response.raise_for_status()
-        data = response.json()
+        response.raise_for_status()  # Raise an exception for HTTP errors
+        data = response.json()  # Parse the JSON response
 
-        # Check the User-Agent header to determine the client type
+        # Determine the client type based on the User-Agent header
         user_agent = request.headers.get('User-Agent', '').lower()
         is_browser = any(browser in user_agent for browser in ['mozilla', 'chrome', 'safari', 'firefox', 'edge'])
 
@@ -41,8 +60,10 @@ def get_forecast():
         location = data.get('location', {}).get('name', 'Unknown location')
         forecast_days = data.get('forecast', {}).get('forecastday', [])
         if not forecast_days:
+            # Return an error if no forecast data is available
             return jsonify({'error': 'No forecast data available'}), 500
 
+        # Generate HTML table rows for each forecast day
         table_rows = ''.join(
             f"<tr>"
             f"<td><img src='{day['day']['condition']['icon']}' alt='icon'></td>"
@@ -53,6 +74,7 @@ def get_forecast():
             f"</tr>"
             for day in forecast_days
         )
+        # Construct the full HTML response
         html_response = f"""
         <html>
             <head>
@@ -81,9 +103,9 @@ def get_forecast():
         return html_response, 200
 
     except requests.exceptions.HTTPError as e:
-        # Handle specific HTTP errors
+        # Handle specific HTTP errors (e.g., API key exhaustion or rate limiting)
         if response.status_code in [403, 429]:
-            # Friendly banner for API key exhaustion or rate limiting
+            # Return a friendly HTML banner for these errors
             html_response = """
             <html>
                 <head>
@@ -99,10 +121,13 @@ def get_forecast():
             """
             return html_response, 503
         else:
+            # Return a JSON error for other HTTP errors
             return jsonify({'error': f'HTTP error occurred: {e}'}), response.status_code
 
     except requests.exceptions.RequestException as e:
+        # Handle general request exceptions
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
+    # Run the Flask application in debug mode
     app.run(debug=True)

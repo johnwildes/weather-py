@@ -1,25 +1,27 @@
+# Import necessary modules for testing
 import os
 import pytest
 from unittest.mock import patch
 from flask import Flask
 from main import app
 
-# filepath: c:\Code\weather-py\test_main.py
-
 @pytest.fixture
 def client():
+    # Set up a test client for the Flask application
     app.testing = True
     with app.test_client() as client:
         yield client
 
 @patch('main.requests.get')
 def test_missing_zip_code(mock_get, client):
+    # Test the behavior when no ZIP code is provided in the request
     response = client.get('/forecast')
     assert response.status_code == 400
     assert response.json == {'error': 'ZIP code is required'}
 
 @patch('main.requests.get')
 def test_missing_api_key(mock_get, client):
+    # Test the behavior when the API key is not configured
     os.environ.pop('WEATHER_API_KEY', None)  # Ensure API key is not set
     response = client.get('/forecast?zip=12345')
     assert response.status_code == 500
@@ -27,6 +29,7 @@ def test_missing_api_key(mock_get, client):
 
 @patch('main.requests.get')
 def test_successful_response(mock_get, client):
+    # Test a successful response from the weather API
     os.environ['WEATHER_API_KEY'] = 'test_api_key'  # Set a dummy API key
     mock_response = {
         'location': {'name': 'Test City'},
@@ -56,6 +59,7 @@ def test_successful_response(mock_get, client):
 
 @patch('main.requests.get')
 def test_api_error_response(mock_get, client):
+    # Test the behavior when the weather API raises an exception
     os.environ['WEATHER_API_KEY'] = 'test_api_key'  # Set a dummy API key
     mock_get.side_effect = Exception('API error')
 
@@ -65,6 +69,7 @@ def test_api_error_response(mock_get, client):
 
 @patch('main.requests.get')
 def test_cli_user_agent(mock_get, client):
+    # Test the response for a CLI user agent
     os.environ['WEATHER_API_KEY'] = 'test_api_key'  # Set a dummy API key
     mock_response = {
         'location': {'name': 'Test City'},
@@ -94,6 +99,7 @@ def test_cli_user_agent(mock_get, client):
 
 @patch('main.requests.get')
 def test_browser_user_agent(mock_get, client):
+    # Test the response for a browser user agent
     os.environ['WEATHER_API_KEY'] = 'test_api_key'  # Set a dummy API key
     mock_response = {
         'location': {'name': 'Test City'},

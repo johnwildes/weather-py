@@ -9,6 +9,8 @@ jobs:
   build-and-deploy:
     name: Build and Deploy to Azure Container Apps
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Require write permission to Fetch an OIDC token.
 
     steps:
     # Checkout the repository

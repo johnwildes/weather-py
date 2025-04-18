@@ -76,8 +76,8 @@ def get_forecast():
             for day in forecast_days
         )
 
-        # Get the current date and time
-        current_datetime = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        # Get the current date and time in UTC
+        current_datetime = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')
 
         # Construct the full HTML response
         html_response = f"""

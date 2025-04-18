@@ -15,7 +15,9 @@ import os
 from flask import Flask, request, jsonify
 import requests
 from dotenv import load_dotenv
-from datetime import datetime  # Add this import
+from datetime import datetime
+from datetime import timezone
+
 
 # Load environment variables from a .env file if it exists
 load_dotenv()

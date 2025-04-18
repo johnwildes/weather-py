@@ -3,7 +3,7 @@ name: Build and Deploy to Azure
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   build-and-deploy:
@@ -30,7 +30,7 @@ jobs:
       run: |
         docker build -t ghcr.io/${{ secrets.GHCR_USERNAME }}/weather-py:latest .
 
-    # Push the Docker image to Azure Container Registry
+    # Push the Docker image to GitHub Container Registry
     - name: Push Docker image to ACR
       run: |
         echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin

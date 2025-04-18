@@ -129,5 +129,9 @@ def get_forecast():
         return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
-    # Run the Flask application in debug mode
-    app.run(debug=True)
+    # Get the port from the environment variable or default to 5000
+    port = int(os.getenv('PORT', 5000))
+    # Determine whether to run in debug mode based on the environment variable
+    debug_mode = os.getenv('FLASK_DEBUG', 'false').lower() == 'true'
+    # Run the Flask application
+    app.run(host='0.0.0.0', port=port, debug=debug_mode)

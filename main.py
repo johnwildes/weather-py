@@ -18,6 +18,7 @@ from dotenv import load_dotenv
 # Import blueprints
 from forecast import forecast_bp  # Import forecast blueprint
 from home import home_bp  # Import home blueprint
+from datetime import datetime
 
 # Load environment variables from a .env file if it exists
 load_dotenv()

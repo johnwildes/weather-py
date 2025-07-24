@@ -1,4 +1,4 @@
-from flask import Blueprint, request, render_template_string
+from flask import Blueprint, request, render_template
 import os
 import requests  # Add this import for making HTTP requests
 
@@ -27,36 +27,25 @@ def home():
     except Exception as e:
         user_info = {"error": "Unable to fetch IP information"}
 
-    # Construct the weather map URL
-    weather_map_url = f"https://maps.weatherapi.com/v1/map.png?key={api_key}&q={location}&zoom=6"
+    # Get user's location for current weather
+    location = user_info.get('city', 'London')  # Default to London if no city found
+    
+    # Disable weather map due to reliability issues with external map services
+    weather_map_url = None
+    
+    # Get current weather for the user's location
+    current_weather = None
+    if location:
+        try:
+            weather_url = f"http://api.weatherapi.com/v1/current.json?key={api_key}&q={location}&aqi=yes"
+            weather_response = requests.get(weather_url)
+            if weather_response.status_code == 200:
+                current_weather = weather_response.json()
+        except Exception as e:
+            current_weather = None
 
-    # Render the home page with the weather map and user information
-    html_response = f"""
-    <html>
-        <head>
-            <title>Weather Map</title>
-            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-        </head>
-        <body class="container my-4">
-            <h1 class="text-center mb-4">Weather Map</h1>
-            <div class="text-center">
-                <img src="{weather_map_url}" alt="Weather Map" class="img-fluid">
-            </div>
-            <div class="mt-4">
-                <h2>User Information</h2>
-                <table class="table table-bordered">
-                    <tr><th>IP Address</th><td>{user_info.get('ip', 'N/A')}</td></tr>
-                    <tr><th>City</th><td>{user_info.get('city', 'N/A')}</td></tr>
-                    <tr><th>Region</th><td>{user_info.get('region', 'N/A')}</td></tr>
-                    <tr><th>Country</th><td>{user_info.get('country', 'N/A')}</td></tr>
-                    <tr><th>Location</th><td>{user_info.get('loc', 'N/A')}</td></tr>
-                    <tr><th>Organization</th><td>{user_info.get('org', 'N/A')}</td></tr>
-                </table>
-            </div>
-            <footer class="text-center mt-4">
-                <a href="/forecast" class="btn btn-primary">View 10-Day Forecast</a>
-            </footer>
-        </body>
-    </html>
-    """
-    return html_response, 200
+    # Render the home page template with context data
+    return render_template('home.html', 
+                         user_info=user_info,
+                         weather_map_url=weather_map_url,
+                         current_weather=current_weather)

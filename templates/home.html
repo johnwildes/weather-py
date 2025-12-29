@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+{% block title %}Weather Home - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="home-content">
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+        <fluent-card class="welcome-card">
+            <h2>Welcome to Weather Forecast</h2>
+            <p>Track weather conditions for multiple locations with our modern, user-friendly interface.</p>
+            
+            {% if user_info %}
+            <div class="user-location-info">
+                <h3>Your Current Location</h3>
+                <div class="location-details">
+                    <div class="detail-row">
+                        <fluent-icon name="Location24Regular"></fluent-icon>
+                        <span>{{ user_info.get('city', 'Unknown') }}, {{ user_info.get('region', '') }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <fluent-icon name="Globe24Regular"></fluent-icon>
+                        <span>{{ user_info.get('country', 'Unknown') }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <fluent-icon name="Wifi124Regular"></fluent-icon>
+                        <span>{{ user_info.get('ip', 'Unknown') }}</span>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </fluent-card>
+    </div>
+
+    <!-- Current Weather Section -->
+    {% if current_weather %}
+    <div class="weather-section">
+        <fluent-card class="weather-card">
+            <h2>Current Weather - {{ current_weather.location.name }}</h2>
+            <div class="current-weather-display">
+                <div class="weather-main">
+                    <div class="weather-icon">
+                        <img src="https:{{ current_weather.current.condition.icon }}" 
+                             alt="{{ current_weather.current.condition.text }}" 
+                             class="condition-icon" />
+                    </div>
+                    <div class="weather-info">
+                        <div class="temperature">{{ current_weather.current.temp_c }}°C</div>
+                        <div class="condition">{{ current_weather.current.condition.text }}</div>
+                        <div class="location">
+                            {%- set location_parts = current_weather.location.name.split(',') -%}
+                            {%- if location_parts|length > 1 -%}
+                                {{ location_parts[0]|trim }}, {{ current_weather.location.country }}
+                            {%- else -%}
+                                {{ current_weather.location.name }}, {{ current_weather.location.country }}
+                            {%- endif -%}
+                        </div>
+                    </div>
+                </div>
+                <div class="weather-details">
+                    <div class="detail-item">
+                        <fluent-icon name="Eye24Regular"></fluent-icon>
+                        <span>Visibility: {{ current_weather.current.vis_km }} km</span>
+                    </div>
+                    <div class="detail-item">
+                        <fluent-icon name="Drop24Regular"></fluent-icon>
+                        <span>Humidity: {{ current_weather.current.humidity }}%</span>
+                    </div>
+                    <div class="detail-item">
+                        <fluent-icon name="WeatherWindy24Regular"></fluent-icon>
+                        <span>Wind: {{ current_weather.current.wind_kph }} km/h {{ current_weather.current.wind_dir }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <fluent-icon name="Gauge24Regular"></fluent-icon>
+                        <span>Pressure: {{ current_weather.current.pressure_mb }} mb</span>
+                    </div>
+                    {% if current_weather.current.air_quality %}
+                    <div class="detail-item">
+                        <fluent-icon name="LeafOne24Regular"></fluent-icon>
+                        <span>Air Quality: 
+                            {% set aqi = current_weather.current.air_quality.get('us-epa-index', 'N/A') %}
+                            {% if aqi == 1 %}Good
+                            {% elif aqi == 2 %}Moderate
+                            {% elif aqi == 3 %}Unhealthy for Sensitive
+                            {% elif aqi == 4 %}Unhealthy
+                            {% elif aqi == 5 %}Very Unhealthy
+                            {% elif aqi == 6 %}Hazardous
+                            {% else %}{{ aqi }}
+                            {% endif %}
+                        </span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </fluent-card>
+    </div>
+    {% endif %}
+
+    <!-- Weather Map Section (when available) -->
+    {% if weather_map_url %}
+    <div class="map-section">
+        <fluent-card class="map-card">
+            <h3>Weather Map</h3>
+            <div class="map-container">
+                <img src="{{ weather_map_url }}" alt="Weather Map" class="weather-map" 
+                     onerror="this.parentElement.parentElement.parentElement.style.display='none';" />
+            </div>
+        </fluent-card>
+    </div>
+    {% endif %}
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <fluent-card class="actions-card">
+            <h3>Quick Actions</h3>
+            <div class="action-buttons">
+                <fluent-button 
+                    appearance="accent" 
+                    onclick="window.location.href='/forecast'">
+                    <fluent-icon slot="start" name="WeatherPartlyCloudyDay24Regular"></fluent-icon>
+                    View Detailed Forecast
+                </fluent-button>
+                
+                <fluent-button 
+                    appearance="outline" 
+                    onclick="useCurrentLocation()">
+                    <fluent-icon slot="start" name="MyLocation24Regular"></fluent-icon>
+                    Add Current Location
+                </fluent-button>
+            </div>
+        </fluent-card>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="recent-activity">
+        <fluent-card class="activity-card">
+            <h3>Recent Locations</h3>
+            <div id="recentLocationsList" class="recent-list">
+                <!-- Recent locations will be populated by JavaScript -->
+            </div>
+        </fluent-card>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/home.js') }}"></script>
+{% endblock %}

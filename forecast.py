@@ -1,132 +1,153 @@
-from flask import Blueprint, request, jsonify
+"""
+Forecast blueprint for weather data routes.
+
+This module handles all forecast-related routes, using the WeatherService
+abstraction for API calls.
+"""
+
+from flask import Blueprint, request, jsonify, render_template
 import os
-import requests
-from datetime import datetime, timedelta
+
+from services import WeatherAPIProvider
 
 forecast_bp = Blueprint('forecast', __name__)
 
+# Initialize the weather service
+# In a larger app, this could be injected via dependency injection
+_weather_service = None
+
+
+def get_weather_service():
+    """Get or create the weather service instance."""
+    global _weather_service
+    if _weather_service is None:
+        _weather_service = WeatherAPIProvider()
+    return _weather_service
+
+
 @forecast_bp.route('', methods=['GET'])
 def get_forecast():
-    # Retrieve the ZIP code from the request arguments
+    """
+    Get forecast page or JSON data.
+
+    Returns HTML for browser clients, JSON for API clients.
+    """
     zip_code = request.args.get('zip')
+    service = get_weather_service()
+
+    # Determine client type from User-Agent
+    user_agent = request.headers.get('User-Agent', '').lower()
+    is_browser = any(browser in user_agent for browser in ['mozilla', 'chrome', 'safari', 'firefox', 'edge'])
+
+    if is_browser:
+        weather_data = []
+        if zip_code:
+            weather_info = service.get_weather_data(zip_code)
+            if weather_info:
+                weather_data.append(weather_info)
+        return render_template('forecast.html', weather_data=weather_data)
+
+    # JSON response for non-browser clients
     if not zip_code:
-        # If no ZIP code is provided, try to use the default ZIP code from environment variables
         zip_code = os.getenv('DEFAULT_ZIP_CODE')
         if not zip_code:
-            # Return an error if neither a ZIP code nor a default is configured
             return jsonify({'error': 'ZIP code is required and no default is configured'}), 400
 
-    # Retrieve the API key for the weather service from environment variables
-    api_key = os.getenv('WEATHER_API_KEY')
-    if not api_key:
-        # Return an error if the API key is not configured
-        return jsonify({'error': 'Weather API key is not configured'}), 500
+    weather_info = service.get_weather_data(zip_code)
+    if weather_info:
+        return jsonify({
+            'forecast': weather_info['forecast'],
+            'history': weather_info.get('history', [])
+        }), 200
+    else:
+        return jsonify({'error': 'Unable to fetch weather data'}), 500
 
-    # Construct the URL for the weather API request
-    weather_api_url = f'http://api.weatherapi.com/v1/forecast.json?key={api_key}&q={zip_code}&days=3'
-    history_api_url = f'http://api.weatherapi.com/v1/history.json?key={api_key}&q={zip_code}'
+
+@forecast_bp.route('/api/weather/bulk', methods=['POST'])
+def get_bulk_weather():
+    """Get weather data for multiple locations."""
+    try:
+        data = request.get_json()
+        if not data or 'locations' not in data:
+            return jsonify({'error': 'No locations provided'}), 400
+
+        locations = data['locations']
+        service = get_weather_service()
+
+        weather_results = service.get_bulk_weather(locations)
+        return jsonify(weather_results), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@forecast_bp.route('/api/validate-location', methods=['GET'])
+def validate_location():
+    """Validate if a location exists."""
+    location = request.args.get('location')
+    if not location:
+        return jsonify({'error': 'No location provided'}), 400
+
+    service = get_weather_service()
 
     try:
-        # Make the HTTP GET request to the weather API for forecast
-        response = requests.get(weather_api_url)
-        response.raise_for_status()  # Raise an exception for HTTP errors
-        forecast_data = response.json()  # Parse the JSON response
+        is_valid, location_info = service.validate_location(location)
+        if is_valid:
+            return jsonify({'valid': True, 'location': location_info}), 200
+        return jsonify({'valid': False}), 200
+    except Exception as e:
+        return jsonify({'valid': False, 'error': str(e)}), 200
 
-        # Make the HTTP GET requests for the previous 7 days of history
-        history_data = []
-        for i in range(1, 8):
-            date = (datetime.now() - timedelta(days=i)).strftime('%Y-%m-%d')
-            history_response = requests.get(f"{history_api_url}&dt={date}")
-            history_response.raise_for_status()
-            history_data.append(history_response.json())
 
-        # Determine the client type based on the User-Agent header
-        user_agent = request.headers.get('User-Agent', '').lower()
-        is_browser = any(browser in user_agent for browser in ['mozilla', 'chrome', 'safari', 'firefox', 'edge'])
+@forecast_bp.route('/api/search-locations', methods=['GET'])
+def search_locations():
+    """Search for locations using autocomplete."""
+    query = request.args.get('q')
+    if not query or len(query) < 2:
+        return jsonify([]), 200
 
-        if not is_browser:
-            # Return JSON response for CLI tools
-            return jsonify({'forecast': forecast_data, 'history': history_data}), 200
+    service = get_weather_service()
 
-        # Format the forecast data into an HTML table for browsers
-        location = forecast_data.get('location', {}).get('name', 'Unknown location')
-        forecast_days = forecast_data.get('forecast', {}).get('forecastday', [])
-        if not forecast_days:
-            # Return an error if no forecast data is available
-            return jsonify({'error': 'No forecast data available'}), 500
+    try:
+        results = service.search_locations(query, limit=10)
+        return jsonify([r.to_dict() for r in results]), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
-        # Generate HTML table rows for each forecast day
-        forecast_table_rows = ''.join(
-            f"<tr>"
-            f"<td><img src='{day['day']['condition']['icon']}' alt='icon'></td>"
-            f"<td>{day['date']}</td>"
-            f"<td>{day['day']['condition']['text']}</td>"
-            f"<td>{day['day']['maxtemp_c']}°C / {day['day']['maxtemp_f']}°F</td>"
-            f"<td>{day['day']['mintemp_c']}°C / {day['day']['mintemp_f']}°F</td>"
-            f"</tr>"
-            for day in forecast_days
-        )
 
-        # Generate HTML table rows for each history day
-        history_table_rows = ''.join(
-            f"<tr>"
-            f"<td><img src='{day['forecast']['forecastday'][0]['day']['condition']['icon']}' alt='icon'></td>"
-            f"<td>{day['forecast']['forecastday'][0]['date']}</td>"
-            f"<td>{day['forecast']['forecastday'][0]['day']['condition']['text']}</td>"
-            f"<td>{day['forecast']['forecastday'][0]['day']['maxtemp_c']}°C / {day['forecast']['forecastday'][0]['day']['maxtemp_f']}°F</td>"
-            f"<td>{day['forecast']['forecastday'][0]['day']['mintemp_c']}°C / {day['forecast']['forecastday'][0]['day']['mintemp_f']}°F</td>"
-            f"</tr>"
-            for day in history_data
-        )
+@forecast_bp.route('/api/detailed-forecast', methods=['GET'])
+def get_detailed_forecast():
+    """Get detailed forecast with astronomy and hourly data."""
+    location = request.args.get('location')
+    if not location:
+        return jsonify({'error': 'No location provided'}), 400
 
-        # Construct the full HTML response
-        html_response = f"""
-        <html>
-            <head>
-                <title>Weather Forecast</title>
-                <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
-            </head>
-            <body class="container my-4">
-                <h1 class="text-center mb-4">Weather Forecast for {location}</h1>
-                <h2>3-Day Forecast</h2>
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>Icon</th>
-                                <th>Date</th>
-                                <th>Condition</th>
-                                <th>High Temp (°C / °F)</th>
-                                <th>Low Temp (°C / °F)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {forecast_table_rows}
-                        </tbody>
-                    </table>
-                </div>
-                <h2>Previous 7 Days</h2>
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped">
-                        <thead class="table-dark">
-                            <tr>
-                                <th>Icon</th>
-                                <th>Date</th>
-                                <th>Condition</th>
-                                <th>High Temp (°C / °F)</th>
-                                <th>Low Temp (°C / °F)</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {history_table_rows}
-                        </tbody>
-                    </table>
-                </div>
-            </body>
-        </html>
-        """
-        return html_response, 200
+    service = get_weather_service()
 
-    except requests.exceptions.RequestException as e:
-        # Handle general request exceptions
+    try:
+        data = service.get_detailed_forecast(location, days=10)
+        if data:
+            return jsonify(data), 200
+        return jsonify({'error': 'Unable to fetch detailed forecast'}), 500
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+@forecast_bp.route('/api/hourly-forecast', methods=['GET'])
+def get_hourly_forecast():
+    """Get hourly forecast for a specific location and date."""
+    location = request.args.get('location')
+    date = request.args.get('date')
+
+    if not location or not date:
+        return jsonify({'error': 'Location and date required'}), 400
+
+    service = get_weather_service()
+
+    try:
+        data = service.get_hourly_forecast(location, date)
+        if data:
+            return jsonify(data), 200
+        return jsonify({'error': 'Unable to fetch hourly forecast'}), 500
+    except Exception as e:
         return jsonify({'error': str(e)}), 500

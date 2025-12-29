@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Weather App{% endblock %}</title>
+    
+    <!-- Fluent UI Web Components -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/@fluentui/web-components@2.6.0/dist/web-components.min.js"></script>
+    
+    <!-- Fluent UI Design Tokens -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fluentui/tokens@1.0.0-alpha.27/global.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+    
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <!-- Main Navigation -->
+    <header class="app-header">
+        <fluent-toolbar>
+            <h1 class="app-title">
+                <fluent-anchor href="/">
+                    <fluent-icon name="CloudWeather24Regular"></fluent-icon>
+                    Weather Forecast
+                </fluent-anchor>
+            </h1>
+            <div class="nav-links">
+                <fluent-anchor href="/" appearance="subtle">Home</fluent-anchor>
+                <fluent-anchor href="/forecast" appearance="subtle">Forecast</fluent-anchor>
+            </div>
+        </fluent-toolbar>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+        <!-- Location Toolbar -->
+        {% block toolbar %}
+        <section class="location-toolbar">
+            {% include 'components/toolbar.html' %}
+        </section>
+        {% endblock %}
+
+        <!-- Page Content -->
+        <section class="content-area">
+            {% block content %}{% endblock %}
+        </section>
+
+        <!-- Message Bar for notifications -->
+        <fluent-message-bar id="messageBar" hidden>
+            <span class="message-content" id="messageText"></span>
+            <fluent-button slot="action" appearance="lightweight" onclick="document.getElementById('messageBar').hidden = true">
+                Dismiss
+            </fluent-button>
+        </fluent-message-bar>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+        <p>&copy; 2025 Weather Forecast App. Powered by WeatherAPI.</p>
+    </footer>
+
+    <!-- Core JavaScript -->
+    <!-- Phase 4: Enhanced State Management & API Integration -->
+    <script src="{{ url_for('static', filename='js/weather-api.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/state-manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/enhanced-app.js') }}"></script>
+    
+    <!-- Legacy support -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/location-manager.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

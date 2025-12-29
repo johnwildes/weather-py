@@ -1,0 +1,152 @@
+<!-- Weather Card Component -->
+<fluent-card class="weather-card" data-location="{{ location.name }}">
+    <div class="card-header">
+        <div class="location-info">
+            <h3 class="location-name">{{ location.name }}</h3>
+            <p class="location-details">{{ location.region }}{% if location.region and location.country %}, {% endif %}{{ location.country }}</p>
+            {% if location.localtime %}
+            <p class="local-time">Local time: {{ location.localtime.split(' ')[1] }}</p>
+            {% endif %}
+        </div>
+        <div class="card-actions-header">
+            <fluent-button 
+                appearance="stealth" 
+                class="favorite-btn"
+                onclick="toggleFavorite('{{ location.name }}')"
+                title="Add to favorites">
+                <fluent-icon name="Star24Regular" id="star-{{ location.name|replace(' ', '-') }}"></fluent-icon>
+            </fluent-button>
+            <fluent-button 
+                appearance="stealth" 
+                class="remove-btn"
+                onclick="removeLocation('{{ location.name }}')"
+                title="Remove location">
+                <fluent-icon name="Dismiss24Regular"></fluent-icon>
+            </fluent-button>
+        </div>
+    </div>
+
+    <!-- Weather Alerts (if any) -->
+    {% if alerts and alerts.alert %}
+    <div class="weather-alerts">
+        {% for alert in alerts.alert[:2] %}
+        <fluent-message-bar intent="warning" class="alert-message">
+            <fluent-icon slot="icon" name="Warning24Regular"></fluent-icon>
+            <strong>{{ alert.event }}</strong>: {{ alert.headline[:100] }}{% if alert.headline|length > 100 %}...{% endif %}
+        </fluent-message-bar>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="current-weather">
+        <div class="weather-icon">
+            <img src="https:{{ current.condition.icon }}" alt="{{ current.condition.text }}" />
+        </div>
+        <div class="temperature">
+            <span class="temp-value">{{ current.temp_c }}</span>
+            <span class="temp-unit">°C</span>
+        </div>
+        <div class="condition">
+            <p class="condition-text">{{ current.condition.text }}</p>
+            <p class="feels-like">Feels like {{ current.feelslike_c }}°C</p>
+            {% if current.uv %}
+            <p class="uv-index">UV Index: <span class="uv-value uv-{{ 'low' if current.uv <= 2 else 'moderate' if current.uv <= 5 else 'high' if current.uv <= 7 else 'very-high' if current.uv <= 10 else 'extreme' }}">{{ current.uv }}</span></p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="weather-details">
+        <div class="detail-item">
+            <fluent-icon name="WeatherWindy24Regular"></fluent-icon>
+            <span>{{ current.wind_kph }} km/h {{ current.wind_dir }}</span>
+        </div>
+        <div class="detail-item">
+            <fluent-icon name="Drop24Regular"></fluent-icon>
+            <span>{{ current.humidity }}%</span>
+        </div>
+        <div class="detail-item">
+            <fluent-icon name="Eye24Regular"></fluent-icon>
+            <span>{{ current.vis_km }} km</span>
+        </div>
+        <div class="detail-item">
+            <fluent-icon name="Gauge24Regular"></fluent-icon>
+            <span>{{ current.pressure_mb }} mb</span>
+        </div>
+        {% if current.precip_mm and current.precip_mm > 0 %}
+        <div class="detail-item">
+            <fluent-icon name="WeatherRain24Regular"></fluent-icon>
+            <span>{{ current.precip_mm }} mm</span>
+        </div>
+        {% endif %}
+        {% if current.cloud %}
+        <div class="detail-item">
+            <fluent-icon name="WeatherCloudy24Regular"></fluent-icon>
+            <span>{{ current.cloud }}% clouds</span>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if forecast and forecast.forecastday %}
+    <div class="forecast-section">
+        <h4>3-Day Forecast</h4>
+        <div class="forecast-days">
+            {% for day in forecast.forecastday[:3] %}
+            <div class="forecast-day" onclick="showHourlyForecast('{{ location.name }}', '{{ day.date }}')">
+                <span class="day-name">{{ day.date | format_date }}</span>
+                <img src="https:{{ day.day.condition.icon }}" alt="{{ day.day.condition.text }}" class="forecast-icon" />
+                <div class="temp-range">
+                    <span class="high-temp">{{ day.day.maxtemp_c }}°</span>
+                    <span class="low-temp">{{ day.day.mintemp_c }}°</span>
+                </div>
+                {% if day.day.daily_chance_of_rain > 0 %}
+                <span class="rain-chance">{{ day.day.daily_chance_of_rain }}%</span>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Air Quality Index (if available) -->
+    {% if current.air_quality %}
+    <div class="air-quality-section">
+        <h4>Air Quality</h4>
+        <div class="aqi-info">
+            <span class="aqi-value aqi-{{ 'good' if current.air_quality.us_epa_index <= 50 else 'moderate' if current.air_quality.us_epa_index <= 100 else 'unhealthy-sensitive' if current.air_quality.us_epa_index <= 150 else 'unhealthy' }}">
+                AQI: {{ current.air_quality.us_epa_index }}
+            </span>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="card-actions">
+        <fluent-button appearance="subtle" onclick="showDetailedForecast('{{ location.name }}')">
+            <fluent-icon slot="start" name="ChevronRight24Regular"></fluent-icon>
+            View Details
+        </fluent-button>
+        
+        <fluent-button appearance="subtle" onclick="shareWeatherInfo('{{ location.name }}')">
+            <fluent-icon slot="start" name="Share24Regular"></fluent-icon>
+            Share
+        </fluent-button>
+        
+        <fluent-menu-button appearance="subtle">
+            <fluent-icon slot="start" name="MoreHorizontal24Regular"></fluent-icon>
+            More
+            <fluent-menu slot="menu">
+                <fluent-menu-item onclick="pinToTop('{{ location.name }}')">
+                    <fluent-icon slot="start" name="Pin24Regular"></fluent-icon>
+                    Pin to Top
+                </fluent-menu-item>
+                <fluent-menu-item onclick="setAsHome('{{ location.name }}')">
+                    <fluent-icon slot="start" name="Home24Regular"></fluent-icon>
+                    Set as Home
+                </fluent-menu-item>
+                <fluent-menu-item onclick="createAlert('{{ location.name }}')">
+                    <fluent-icon slot="start" name="Alert24Regular"></fluent-icon>
+                    Create Alert
+                </fluent-menu-item>
+            </fluent-menu>
+        </fluent-menu-button>
+    </div>
+</fluent-card>

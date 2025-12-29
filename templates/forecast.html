@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Weather Forecast - {{ super() }}{% endblock %}
+
+{% block content %}
+<div class="forecast-content">
+    <!-- Weather Cards Grid -->
+    <div class="weather-grid" id="weatherGrid">
+        {% if weather_data %}
+            {% for location_data in weather_data %}
+            <div class="weather-card-container">
+                {% set location = location_data.location %}
+                {% set current = location_data.current %}
+                {% set forecast = location_data.forecast %}
+                {% include 'components/weather-card.html' %}
+            </div>
+            {% endfor %}
+        {% else %}
+        <div class="empty-state">
+            <fluent-card class="empty-card">
+                <div class="empty-content">
+                    <fluent-icon name="WeatherSunny24Regular" class="empty-icon"></fluent-icon>
+                    <h3>No Locations Selected</h3>
+                    <p>Add locations using the toolbar above to view weather forecasts.</p>
+                    <fluent-button 
+                        appearance="accent" 
+                        onclick="focusLocationInput()">
+                        <fluent-icon slot="start" name="Add24Regular"></fluent-icon>
+                        Add Your First Location
+                    </fluent-button>
+                </div>
+            </fluent-card>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Comparison View Toggle -->
+    {% if weather_data and weather_data|length > 1 %}
+    <div class="view-controls">
+        <fluent-card class="controls-card">
+            <div class="control-group">
+                <label>View Mode:</label>
+                <fluent-radio-group id="viewMode" value="grid" onchange="changeViewMode(this.value)">
+                    <fluent-radio value="grid">Grid View</fluent-radio>
+                    <fluent-radio value="comparison">Comparison View</fluent-radio>
+                </fluent-radio-group>
+            </div>
+            
+            <div class="control-group">
+                <label>Temperature Unit:</label>
+                <fluent-radio-group id="tempUnit" value="celsius" onchange="changeTempUnit(this.value)">
+                    <fluent-radio value="celsius">Celsius</fluent-radio>
+                    <fluent-radio value="fahrenheit">Fahrenheit</fluent-radio>
+                </fluent-radio-group>
+            </div>
+        </fluent-card>
+    </div>
+    {% endif %}
+
+    <!-- Detailed Forecast Modal -->
+    <fluent-dialog id="detailDialog" modal hidden>
+        <div class="dialog-content">
+            <div class="dialog-header">
+                <h2 id="dialogTitle">Detailed Forecast</h2>
+                <fluent-button 
+                    appearance="stealth" 
+                    onclick="closeDetailDialog()"
+                    class="close-btn">
+                    <fluent-icon name="Dismiss24Regular"></fluent-icon>
+                </fluent-button>
+            </div>
+            <div class="dialog-body" id="dialogBody">
+                <!-- Detailed forecast content will be loaded here -->
+            </div>
+        </div>
+    </fluent-dialog>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/forecast.js') }}"></script>
+<script src="{{ url_for('static', filename='js/location-manager.js') }}"></script>
+{% endblock %}

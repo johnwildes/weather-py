@@ -269,6 +269,9 @@ class EnhancedWeatherApp {
     }
 
     clearAllLocations() {
+        // Close the menu first
+        this.closeMoreActionsMenu();
+        
         if (this.stateManager.getSelectedLocations().length === 0) {
             MessageBar.info('No locations to clear');
             return;
@@ -604,6 +607,9 @@ class EnhancedWeatherApp {
 
     // Export/Import functionality
     exportSettings() {
+        // Close the menu first
+        this.closeMoreActionsMenu();
+        
         const data = this.stateManager.exportData();
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
@@ -632,6 +638,14 @@ class EnhancedWeatherApp {
         } catch (error) {
             console.error('Import error:', error);
             MessageBar.error('Invalid settings file');
+        }
+    }
+
+    // Helper to close the More Actions menu
+    closeMoreActionsMenu() {
+        const menu = document.getElementById('moreActionsMenu');
+        if (menu && typeof menu.closeMenu === 'function') {
+            menu.closeMenu();
         }
     }
 }

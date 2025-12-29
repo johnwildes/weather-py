@@ -54,6 +54,15 @@ class WeatherApp {
             if (!e.target.closest('.location-input-container')) {
                 this.hideAutocomplete();
             }
+            
+            // Close Fluent UI menus when clicking outside
+            if (!e.target.closest('fluent-menu') && !e.target.closest('fluent-menu-button')) {
+                document.querySelectorAll('fluent-menu').forEach(menu => {
+                    if (typeof menu.closeMenu === 'function') {
+                        menu.closeMenu();
+                    }
+                });
+            }
         });
     }
 

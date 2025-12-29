@@ -70,31 +70,33 @@
                     Refresh All
                 </fluent-button>
                 
-                <fluent-menu-button 
-                    id="moreActionsBtn"
-                    appearance="stealth">
-                    <fluent-icon slot="start" name="MoreVertical24Regular"></fluent-icon>
-                    More Actions
+                <fluent-menu id="moreActionsMenu">
+                    <fluent-menu-button 
+                        id="moreActionsBtn"
+                        slot="trigger"
+                        appearance="stealth">
+                        <fluent-icon slot="start" name="MoreVertical24Regular"></fluent-icon>
+                        More Actions
+                    </fluent-menu-button>
                     
-                    <fluent-menu slot="menu">
-                        <fluent-menu-item onclick="window.weatherApp?.clearAllLocations()">
+                    <fluent-menu-list>
+                        <fluent-menu-item id="clearAllMenuItem">
                             <fluent-icon slot="start" name="Delete24Regular"></fluent-icon>
                             Clear All Locations
                         </fluent-menu-item>
-                        <fluent-menu-item onclick="window.weatherApp?.exportSettings()">
+                        <fluent-menu-item id="exportSettingsMenuItem">
                             <fluent-icon slot="start" name="ArrowDownload24Regular"></fluent-icon>
                             Export Settings
                         </fluent-menu-item>
-                        <fluent-menu-item onclick="document.getElementById('importFileInput').click()">
+                        <fluent-menu-item id="importSettingsMenuItem">
                             <fluent-icon slot="start" name="ArrowUpload24Regular"></fluent-icon>
                             Import Settings
                         </fluent-menu-item>
-                    </fluent-menu>
-                </fluent-menu-button>
+                    </fluent-menu-list>
+                </fluent-menu>
                 
                 <!-- Hidden file input for import -->
-                <input type="file" id="importFileInput" accept=".json" style="display: none;" 
-                       onchange="handleSettingsImport(this.files[0])">
+                <input type="file" id="importFileInput" accept=".json" style="display: none;">
             </div>
 
             <!-- User Preferences -->
@@ -136,15 +138,53 @@
 
 <!-- Phase 4 Integration Scripts -->
 <script>
-// Enhanced toolbar integration functions
-function handleSettingsImport(file) {
-    if (window.weatherApp && file) {
-        window.weatherApp.importSettings(file);
+// Helper to close the More Actions menu
+function closeMoreActionsMenu() {
+    const menu = document.getElementById('moreActionsMenu');
+    if (menu && typeof menu.closeMenu === 'function') {
+        menu.closeMenu();
     }
 }
 
 // Initialize toolbar when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
+    // Menu item event listeners - using event delegation for reliability
+    const clearAllMenuItem = document.getElementById('clearAllMenuItem');
+    const exportSettingsMenuItem = document.getElementById('exportSettingsMenuItem');
+    const importSettingsMenuItem = document.getElementById('importSettingsMenuItem');
+    const importFileInput = document.getElementById('importFileInput');
+
+    // Clear All Locations
+    clearAllMenuItem?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeMoreActionsMenu();
+        window.weatherApp?.clearAllLocations();
+    });
+
+    // Export Settings
+    exportSettingsMenuItem?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeMoreActionsMenu();
+        window.weatherApp?.exportSettings();
+    });
+
+    // Import Settings
+    importSettingsMenuItem?.addEventListener('click', (e) => {
+        e.stopPropagation();
+        closeMoreActionsMenu();
+        importFileInput?.click();
+    });
+
+    // Handle file selection for import
+    importFileInput?.addEventListener('change', (e) => {
+        const file = e.target.files?.[0];
+        if (file && window.weatherApp) {
+            window.weatherApp.importSettings(file);
+        }
+        // Reset the input so the same file can be selected again
+        e.target.value = '';
+    });
+
     // Auto-refresh toggle handler
     const autoRefreshToggle = document.getElementById('autoRefreshToggle');
     if (autoRefreshToggle && window.weatherApp?.stateManager) {

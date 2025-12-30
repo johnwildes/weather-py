@@ -5,11 +5,13 @@ This module handles the home page route, using the WeatherService
 abstraction for weather data retrieval and 10-day forecast display.
 """
 
+import logging
 from flask import Blueprint, request, render_template
 
 from services import WeatherAPIProvider
 
 home_bp = Blueprint('home', __name__)
+logger = logging.getLogger(__name__)
 
 # Initialize the weather service
 _weather_service = None
@@ -37,16 +39,19 @@ def home():
     location = request.args.get('location')
     
     weather_data = None
+    error_message = None
     
     if location:
         try:
             # Get 10-day forecast data
             weather_data = service.get_detailed_forecast(location, days=10)
         except Exception as e:
-            print(f"Error fetching weather data: {e}")
+            logger.error(f"Error fetching weather data for location '{location}': {e}", exc_info=True)
+            error_message = f"Unable to fetch weather data for '{location}'. Please try a different location."
             weather_data = None
 
     return render_template(
         'home.html',
-        weather_data=weather_data
+        weather_data=weather_data,
+        error_message=error_message
     )

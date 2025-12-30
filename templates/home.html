@@ -75,7 +75,7 @@
                     <div class="day-temps">
                         <span class="temp-high">{{ day.day.maxtemp_c }}°</span>
                         <div class="temp-bar">
-                            <div class="temp-bar-fill" style="width: {{ ((day.day.maxtemp_c - day.day.mintemp_c) / 30 * 100)|int }}%;"></div>
+                            <div class="temp-bar-fill" style="width: {{ (((day.day.maxtemp_c - day.day.mintemp_c) / 30 * 100)|int)|min(100)|max(0) }}%;"></div>
                         </div>
                         <span class="temp-low">{{ day.day.mintemp_c }}°</span>
                     </div>

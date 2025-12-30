@@ -2,14 +2,16 @@
 Home blueprint for the landing page.
 
 This module handles the home page route, using the WeatherService
-abstraction for IP-based location detection and current weather.
+abstraction for weather data retrieval and 10-day forecast display.
 """
 
+import logging
 from flask import Blueprint, request, render_template
 
 from services import WeatherAPIProvider
 
 home_bp = Blueprint('home', __name__)
+logger = logging.getLogger(__name__)
 
 # Initialize the weather service
 _weather_service = None
@@ -26,34 +28,30 @@ def get_weather_service():
 @home_bp.route('', methods=['GET'])
 def home():
     """
-    Render the home page with user location and current weather.
+    Render the home page with search and 10-day forecast.
 
-    Uses IP-based geolocation to detect the user's location and
-    display current weather conditions.
+    If a location parameter is provided, displays weather data for that location.
+    Otherwise shows the search interface.
     """
     service = get_weather_service()
-
-    # Get the user's IP address
-    user_ip = request.headers.get('X-Forwarded-For', request.remote_addr)
-
-    # Get location and weather based on IP
-    user_info = {}
-    current_weather = None
-
-    try:
-        location_data = service.get_current_location_by_ip(user_ip)
-        if location_data:
-            user_info = location_data.get('user_info', {})
-            current_weather = location_data.get('current_weather')
-    except Exception:
-        user_info = {"error": "Unable to fetch IP information"}
-
-    # Disable weather map due to reliability issues
-    weather_map_url = None
+    
+    # Get location from query parameter
+    location = request.args.get('location')
+    
+    weather_data = None
+    error_message = None
+    
+    if location:
+        try:
+            # Get 10-day forecast data
+            weather_data = service.get_detailed_forecast(location, days=10)
+        except Exception as e:
+            logger.error(f"Error fetching weather data for location '{location}': {e}", exc_info=True)
+            error_message = f"Unable to fetch weather data for '{location}'. Please try a different location."
+            weather_data = None
 
     return render_template(
         'home.html',
-        user_info=user_info,
-        weather_map_url=weather_map_url,
-        current_weather=current_weather
+        weather_data=weather_data,
+        error_message=error_message
     )

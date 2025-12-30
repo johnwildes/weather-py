@@ -208,8 +208,8 @@ class WeatherApp {
         }
     }
 
-    loadRecentCities(cities = null) {
-        const recentCities = cities !== null ? cities : this.getRecentCities();
+    loadRecentCities(cities) {
+        const recentCities = cities || this.getRecentCities();
         const section = this.elements.recentCitiesSection;
         const list = this.elements.recentCitiesList;
         

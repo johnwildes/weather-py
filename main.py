@@ -12,6 +12,7 @@ Created with GitHub Copilot
 
 # Import necessary modules for Flask application, environment variable handling, and HTTP requests
 import os
+import logging
 from flask import Flask
 from dotenv import load_dotenv
 
@@ -22,6 +23,13 @@ from datetime import datetime, timedelta
 
 # Load environment variables from a .env file if it exists
 load_dotenv()
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
 
 # Initialize the Flask application
 app = Flask(__name__)

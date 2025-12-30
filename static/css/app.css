@@ -412,6 +412,43 @@ body {
     margin: 0;
 }
 
+/* Error State */
+.error-state {
+    width: 100%;
+}
+
+.error-card {
+    background: var(--app-surface);
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    padding: var(--spacing-xl);
+    border-left: 4px solid #d13438;
+}
+
+.error-content {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
+.error-icon {
+    font-size: 4rem;
+}
+
+.error-content h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #d13438;
+    margin: 0;
+}
+
+.error-content p {
+    color: var(--app-text-secondary);
+    margin: 0;
+}
+
 /* Message Bar */
 fluent-message-bar {
     position: fixed;

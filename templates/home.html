@@ -3,7 +3,18 @@
 
 {% block content %}
 <div class="forecast-content" id="forecastContent">
-    {% if weather_data %}
+    {% if error_message %}
+    <!-- Error Message Display -->
+    <div class="error-state">
+        <fluent-card class="error-card">
+            <div class="error-content">
+                <div class="error-icon">⚠️</div>
+                <h3>Error Loading Weather Data</h3>
+                <p>{{ error_message }}</p>
+            </div>
+        </fluent-card>
+    </div>
+    {% elif weather_data %}
     <!-- Current Weather Display -->
     <div class="current-weather-section">
         <fluent-card class="current-weather-card">

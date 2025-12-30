@@ -195,3 +195,26 @@ def test_browser_user_agent(mock_get, client):
     # Browser requests now redirect to home page
     assert response.status_code == 302
     assert '/?location=12345' in response.location
+
+
+@patch('services.weatherapi_provider.requests.get')
+def test_home_route_with_error(mock_get, client):
+    # Test error handling in home route
+    os.environ['WEATHER_API_KEY'] = 'test_api_key'
+    mock_get.side_effect = Exception('API connection error')
+    
+    response = client.get('/?location=12345')
+    assert response.status_code == 200
+    # Check that error message is in the response
+    assert b'Error Loading Weather Data' in response.data
+    assert b'Unable to fetch weather data for' in response.data
+
+
+@patch('services.weatherapi_provider.requests.get')
+def test_home_route_without_location(mock_get, client):
+    # Test home route without location parameter (shows empty state)
+    response = client.get('/')
+    assert response.status_code == 200
+    # Check for empty state content
+    assert b'Search for a location' in response.data
+

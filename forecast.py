@@ -5,7 +5,7 @@ This module handles all forecast-related routes, using the WeatherService
 abstraction for API calls.
 """
 
-from flask import Blueprint, request, jsonify, render_template
+from flask import Blueprint, request, jsonify, redirect
 import os
 
 from services import WeatherAPIProvider
@@ -40,12 +40,10 @@ def get_forecast():
     is_browser = any(browser in user_agent for browser in ['mozilla', 'chrome', 'safari', 'firefox', 'edge'])
 
     if is_browser:
-        weather_data = []
+        # Redirect to home page with location parameter
         if zip_code:
-            weather_info = service.get_weather_data(zip_code)
-            if weather_info:
-                weather_data.append(weather_info)
-        return render_template('forecast.html', weather_data=weather_data)
+            return redirect(f'/?location={zip_code}')
+        return redirect('/')
 
     # JSON response for non-browser clients
     if not zip_code:

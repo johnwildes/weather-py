@@ -17,30 +17,17 @@
     {% block head %}{% endblock %}
 </head>
 <body>
-    <!-- Main Navigation -->
-    <header class="app-header">
-        <fluent-toolbar>
-            <h1 class="app-title">
-                <fluent-anchor href="/">
-                    <fluent-icon name="CloudWeather24Regular"></fluent-icon>
-                    Weather Forecast
-                </fluent-anchor>
-            </h1>
-            <div class="nav-links">
-                <fluent-anchor href="/" appearance="subtle">Home</fluent-anchor>
-                <fluent-anchor href="/forecast" appearance="subtle">Forecast</fluent-anchor>
-            </div>
-        </fluent-toolbar>
-    </header>
-
     <!-- Main Content Area -->
     <main class="app-main">
-        <!-- Location Toolbar -->
-        {% block toolbar %}
-        <section class="location-toolbar">
-            {% include 'components/toolbar.html' %}
+        <!-- Search Section -->
+        <section class="search-section">
+            {% include 'components/search-bar.html' %}
         </section>
-        {% endblock %}
+
+        <!-- Recent Cities Bar (shown when 2+ cities searched) -->
+        <section class="recent-cities-section" id="recentCitiesSection" style="display: none;">
+            {% include 'components/recent-cities.html' %}
+        </section>
 
         <!-- Page Content -->
         <section class="content-area">
@@ -56,20 +43,10 @@
         </fluent-message-bar>
     </main>
 
-    <!-- Footer -->
-    <footer class="app-footer">
-        <p>&copy; 2025 Weather Forecast App. Powered by WeatherAPI.</p>
-    </footer>
-
     <!-- Core JavaScript -->
-    <!-- Phase 4: Enhanced State Management & API Integration -->
     <script src="{{ url_for('static', filename='js/weather-api.js') }}"></script>
     <script src="{{ url_for('static', filename='js/state-manager.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/enhanced-app.js') }}"></script>
-    
-    <!-- Legacy support -->
-    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
-    <script src="{{ url_for('static', filename='js/location-manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/weather-app.js') }}"></script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

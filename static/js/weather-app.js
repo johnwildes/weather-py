@@ -136,14 +136,30 @@ class WeatherApp {
         results.forEach(result => {
             const item = document.createElement('div');
             item.className = 'autocomplete-item';
-            item.innerHTML = `
-                <div class="autocomplete-main">
-                    <span class="autocomplete-name">${result.name}</span>
-                </div>
-                <div class="autocomplete-sub">
-                    ${result.region ? result.region + ', ' : ''}${result.country}
-                </div>
-            `;
+
+            const mainDiv = document.createElement('div');
+            mainDiv.className = 'autocomplete-main';
+
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'autocomplete-name';
+            nameSpan.textContent = result.name || '';
+
+            mainDiv.appendChild(nameSpan);
+
+            const subDiv = document.createElement('div');
+            subDiv.className = 'autocomplete-sub';
+
+            let subText = '';
+            if (result.region) {
+                subText += result.region + ', ';
+            }
+            if (result.country) {
+                subText += result.country;
+            }
+            subDiv.textContent = subText;
+
+            item.appendChild(mainDiv);
+            item.appendChild(subDiv);
             
             item.addEventListener('click', () => {
                 this.selectAutocompleteItem(result);

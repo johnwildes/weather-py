@@ -190,12 +190,13 @@ class WeatherApp {
         
         try {
             localStorage.setItem('weather_recent_cities', JSON.stringify(limitedCities));
+            this.loadRecentCities();
         } catch (e) {
             // Gracefully handle storage failures (QuotaExceededError, SecurityError, etc.)
             // Continue to update UI with in-memory data even if localStorage is unavailable
             console.warn('Failed to save recent cities to localStorage:', e);
+            this.loadRecentCities(limitedCities);
         }
-        this.loadRecentCities();
     }
 
     getRecentCities() {
@@ -207,8 +208,8 @@ class WeatherApp {
         }
     }
 
-    loadRecentCities() {
-        const recentCities = this.getRecentCities();
+    loadRecentCities(cities = null) {
+        const recentCities = cities !== null ? cities : this.getRecentCities();
         const section = this.elements.recentCitiesSection;
         const list = this.elements.recentCitiesList;
         

@@ -1,0 +1,28 @@
+<!-- Search Bar Component -->
+<div class="search-bar-container">
+    <fluent-card class="search-card">
+        <div class="search-content">
+            <h1 class="app-title">Weather Forecast</h1>
+            <div class="search-input-row">
+                <div class="search-input-wrapper">
+                    <fluent-text-field 
+                        id="locationSearch" 
+                        placeholder="Enter city name or zip code..."
+                        appearance="outline"
+                        size="large">
+                    </fluent-text-field>
+                    <!-- Autocomplete dropdown -->
+                    <div class="autocomplete-dropdown" id="autocompleteDropdown" hidden>
+                        <div class="autocomplete-results" id="autocompleteResults"></div>
+                    </div>
+                </div>
+                <fluent-button 
+                    id="searchBtn" 
+                    appearance="accent"
+                    size="large">
+                    Search
+                </fluent-button>
+            </div>
+        </div>
+    </fluent-card>
+</div>

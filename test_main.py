@@ -93,9 +93,9 @@ def test_successful_response(mock_get, client):
 
     headers = {'User-Agent': 'Mozilla/5.0 Chrome/91.0'}
     response = client.get('/forecast?zip=12345', headers=headers)
-    assert response.status_code == 200
-    # Check that some expected content is in the HTML response
-    assert b'Test City' in response.data or b'forecast' in response.data.lower()
+    # Browser requests now redirect to home page
+    assert response.status_code == 302
+    assert '/?location=12345' in response.location
 
 
 @patch('services.weatherapi_provider.requests.get')
@@ -192,5 +192,6 @@ def test_browser_user_agent(mock_get, client):
 
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'}
     response = client.get('/forecast?zip=12345', headers=headers)
-    assert response.status_code == 200
-    assert not response.is_json
+    # Browser requests now redirect to home page
+    assert response.status_code == 302
+    assert '/?location=12345' in response.location

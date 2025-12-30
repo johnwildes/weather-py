@@ -45,7 +45,7 @@ class WeatherApp {
             });
 
             this.elements.locationSearch.addEventListener('blur', () => {
-                setTimeout(() => this.hideAutocomplete(), 200);
+                setTimeout(() => this.hideAutocomplete(), 275);
             });
         }
 

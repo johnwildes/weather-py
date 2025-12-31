@@ -14,6 +14,35 @@ class WeatherApp {
         this.cacheElements();
         this.setupEventListeners();
         this.loadRecentCities();
+        this.disableAutofillOnSearch();
+    }
+
+    // Disable password manager autofill on search input
+    disableAutofillOnSearch() {
+        const searchField = this.elements.locationSearch;
+        if (searchField) {
+            // Wait for the fluent component to fully render
+            requestAnimationFrame(() => {
+                // Try to access the shadow DOM input
+                const shadowInput = searchField.shadowRoot?.querySelector('input');
+                if (shadowInput) {
+                    shadowInput.setAttribute('autocomplete', 'off');
+                    shadowInput.setAttribute('type', 'search');
+                    shadowInput.setAttribute('data-1p-ignore', '');
+                    shadowInput.setAttribute('data-lpignore', 'true');
+                    shadowInput.setAttribute('data-form-type', 'other');
+                    shadowInput.setAttribute('name', 'weather-search-' + Date.now());
+                }
+                // Also set on the control property if available
+                if (searchField.control) {
+                    searchField.control.setAttribute('autocomplete', 'off');
+                    searchField.control.setAttribute('type', 'search');
+                    searchField.control.setAttribute('data-1p-ignore', '');
+                    searchField.control.setAttribute('data-lpignore', 'true');
+                    searchField.control.setAttribute('data-form-type', 'other');
+                }
+            });
+        }
     }
 
     cacheElements() {

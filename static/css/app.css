@@ -84,7 +84,8 @@ body {
     position: relative;
 }
 
-.search-input-wrapper fluent-text-field {
+.search-input-wrapper fluent-text-field,
+.search-input-wrapper fluent-search {
     width: 100%;
 }
 

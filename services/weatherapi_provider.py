@@ -201,13 +201,14 @@ class WeatherAPIProvider(WeatherService):
             data = self._make_request('current.json', {'q': location})
             if data:
                 result = (True, data.get('location', {}))
-            else:
-                result = (False, None)
+                # Cache only successful validations
+                self._location_cache[cache_key] = result
+                return result
 
-            # Cache the result
-            self._location_cache[cache_key] = result
-            return result
+            # For invalid or empty responses, do not cache the negative result
+            return False, None
         except WeatherServiceError:
+            # On API errors, also avoid caching so callers can retry quickly
             return False, None
 
     def search_locations(self, query: str, limit: int = 10) -> list[SearchResult]:

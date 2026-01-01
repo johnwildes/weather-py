@@ -2,3 +2,4 @@ Flask
 requests
 dotenv
 pytest
+cachetools

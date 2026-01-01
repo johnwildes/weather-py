@@ -3,12 +3,14 @@ WeatherAPI.com provider implementation.
 
 This module implements the WeatherService interface for weatherapi.com,
 handling all API communication, error handling, and response formatting.
+Includes server-side caching to reduce API calls and improve response times.
 """
 
 import os
 import requests
 from datetime import datetime, timedelta
 from typing import Optional
+from cachetools import TTLCache
 
 from .weather_service import (
     WeatherService,
@@ -18,6 +20,19 @@ from .weather_service import (
     APIRequestError,
     SearchResult
 )
+
+# Cache configuration
+# Weather data caches (5-minute TTL for frequently changing data)
+WEATHER_CACHE_TTL = 300  # 5 minutes
+WEATHER_CACHE_MAXSIZE = 100
+
+# Location caches (longer TTL since locations don't change)
+LOCATION_CACHE_TTL = 3600  # 1 hour
+LOCATION_CACHE_MAXSIZE = 200
+
+# Search cache (10-minute TTL)
+SEARCH_CACHE_TTL = 600  # 10 minutes
+SEARCH_CACHE_MAXSIZE = 100
 
 
 class WeatherAPIProvider(WeatherService):
@@ -40,6 +55,39 @@ class WeatherAPIProvider(WeatherService):
         """
         self._api_key = api_key or os.getenv('WEATHER_API_KEY')
 
+        # Initialize caches
+        self._weather_cache = TTLCache(maxsize=WEATHER_CACHE_MAXSIZE, ttl=WEATHER_CACHE_TTL)
+        self._forecast_cache = TTLCache(maxsize=WEATHER_CACHE_MAXSIZE, ttl=WEATHER_CACHE_TTL)
+        self._location_cache = TTLCache(maxsize=LOCATION_CACHE_MAXSIZE, ttl=LOCATION_CACHE_TTL)
+        self._search_cache = TTLCache(maxsize=SEARCH_CACHE_MAXSIZE, ttl=SEARCH_CACHE_TTL)
+        self._hourly_cache = TTLCache(maxsize=WEATHER_CACHE_MAXSIZE, ttl=WEATHER_CACHE_TTL)
+        self._current_cache = TTLCache(maxsize=WEATHER_CACHE_MAXSIZE, ttl=WEATHER_CACHE_TTL)
+
+    @staticmethod
+    def _cache_key(*args) -> str:
+        """
+        Generate a cache key from arguments.
+
+        - String arguments are normalized to be case- and whitespace-insensitive
+          (e.g. " New York " and "new york" share the same cache key segment).
+        - Non-string arguments (such as numeric limits) are converted to their
+          string representation without additional normalization so that
+          different values remain distinct.
+        - The current WEATHER_API_KEY value is prefixed into the cache key to
+          avoid cross-key cache pollution if multiple API keys are ever used
+          within the same process.
+        """
+        api_key = os.getenv("WEATHER_API_KEY", "").strip()
+        normalized_args = []
+        for arg in args:
+            if isinstance(arg, str):
+                normalized_args.append(arg.lower().strip())
+            else:
+                normalized_args.append(str(arg))
+        # Prefix with API key so different keys do not share cached entries.
+        if api_key:
+            return f"{api_key}:" + ":".join(normalized_args)
+        return ":".join(normalized_args)
     @property
     def api_key(self) -> str:
         """Get the API key, raising an error if not configured."""
@@ -88,6 +136,12 @@ class WeatherAPIProvider(WeatherService):
             Dictionary with location, current, forecast, alerts, and history data.
             Returns None if the location is invalid.
         """
+        cache_key = self._cache_key('weather', location)
+
+        # Check cache first
+        if cache_key in self._weather_cache:
+            return self._weather_cache[cache_key]
+
         try:
             # Get forecast with alerts and air quality
             forecast_data = self._make_request('forecast.json', {
@@ -103,13 +157,17 @@ class WeatherAPIProvider(WeatherService):
             # Get historical data for the past 7 days
             history_data = self._get_history(location, days=7)
 
-            return {
+            result = {
                 'location': forecast_data.get('location', {}),
                 'current': forecast_data.get('current', {}),
                 'forecast': forecast_data.get('forecast', {}),
                 'alerts': forecast_data.get('alerts', {}),
                 'history': history_data
             }
+
+            # Cache the result
+            self._weather_cache[cache_key] = result
+            return result
 
         except WeatherServiceError:
             return None
@@ -153,12 +211,24 @@ class WeatherAPIProvider(WeatherService):
         Returns:
             Tuple of (is_valid, location_info or None)
         """
+        cache_key = self._cache_key('validate', location)
+
+        # Check cache first
+        if cache_key in self._location_cache:
+            return self._location_cache[cache_key]
+
         try:
             data = self._make_request('current.json', {'q': location})
             if data:
-                return True, data.get('location', {})
+                result = (True, data.get('location', {}))
+                # Cache only successful validations
+                self._location_cache[cache_key] = result
+                return result
+
+            # For invalid or empty responses, do not cache the negative result
             return False, None
         except WeatherServiceError:
+            # On API errors, also avoid caching so callers can retry quickly
             return False, None
 
     def search_locations(self, query: str, limit: int = 10) -> list[SearchResult]:
@@ -175,6 +245,12 @@ class WeatherAPIProvider(WeatherService):
         if not query or len(query) < 2:
             return []
 
+        cache_key = self._cache_key('search', query, limit)
+
+        # Check cache first
+        if cache_key in self._search_cache:
+            return self._search_cache[cache_key]
+
         try:
             data = self._make_request('search.json', {'q': query})
             if not data:
@@ -189,6 +265,9 @@ class WeatherAPIProvider(WeatherService):
                     display=f"{item.get('name', '')}, {item.get('region', '')}, {item.get('country', '')}",
                     value=item.get('name', '')
                 ))
+
+            # Cache the results
+            self._search_cache[cache_key] = results
             return results
 
         except WeatherServiceError:
@@ -205,6 +284,12 @@ class WeatherAPIProvider(WeatherService):
         Returns:
             Dictionary with detailed forecast, astronomy, and hourly data
         """
+        cache_key = self._cache_key('detailed', location, days)
+
+        # Check cache first
+        if cache_key in self._forecast_cache:
+            return self._forecast_cache[cache_key]
+
         try:
             data = self._make_request('forecast.json', {
                 'q': location,
@@ -235,7 +320,7 @@ class WeatherAPIProvider(WeatherService):
                         'hours': day.get('hour', [])
                     })
 
-            return {
+            result = {
                 'location': data.get('location', {}),
                 'current': data.get('current', {}),
                 'forecast': data.get('forecast', {}),
@@ -243,6 +328,10 @@ class WeatherAPIProvider(WeatherService):
                 'astronomy': astronomy,
                 'hourly': hourly
             }
+
+            # Cache the result
+            self._forecast_cache[cache_key] = result
+            return result
 
         except WeatherServiceError:
             return None
@@ -260,6 +349,12 @@ class WeatherAPIProvider(WeatherService):
         Returns:
             Dictionary with hourly breakdown, day summary, and astronomy
         """
+        cache_key = self._cache_key('hourly', location, date)
+
+        # Check cache first
+        if cache_key in self._hourly_cache:
+            return self._hourly_cache[cache_key]
+
         try:
             target_date = datetime.strptime(date, '%Y-%m-%d').date()
             today = datetime.now().date()
@@ -282,13 +377,17 @@ class WeatherAPIProvider(WeatherService):
             forecast_days = data.get('forecast', {}).get('forecastday', [])
             forecast_day = forecast_days[0] if forecast_days else {}
 
-            return {
+            result = {
                 'location': data.get('location', {}),
                 'date': date,
                 'hourly': forecast_day.get('hour', []),
                 'day_summary': forecast_day.get('day', {}),
                 'astronomy': forecast_day.get('astro', {})
             }
+
+            # Cache the result
+            self._hourly_cache[cache_key] = result
+            return result
 
         except (WeatherServiceError, ValueError):
             return None
@@ -337,10 +436,22 @@ class WeatherAPIProvider(WeatherService):
         Returns:
             Full current weather response including location data
         """
+        cache_key = self._cache_key('current', location)
+
+        # Check cache first
+        if cache_key in self._current_cache:
+            return self._current_cache[cache_key]
+
         try:
-            return self._make_request('current.json', {
+            result = self._make_request('current.json', {
                 'q': location,
                 'aqi': 'yes'
             })
+
+            if result:
+                # Cache the result
+                self._current_cache[cache_key] = result
+
+            return result
         except WeatherServiceError:
             return None

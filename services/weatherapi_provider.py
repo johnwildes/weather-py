@@ -65,9 +65,29 @@ class WeatherAPIProvider(WeatherService):
 
     @staticmethod
     def _cache_key(*args) -> str:
-        """Generate a cache key from arguments."""
-        return ':'.join(str(arg).lower().strip() for arg in args)
+        """
+        Generate a cache key from arguments.
 
+        - String arguments are normalized to be case- and whitespace-insensitive
+          (e.g. " New York " and "new york" share the same cache key segment).
+        - Non-string arguments (such as numeric limits) are converted to their
+          string representation without additional normalization so that
+          different values remain distinct.
+        - The current WEATHER_API_KEY value is prefixed into the cache key to
+          avoid cross-key cache pollution if multiple API keys are ever used
+          within the same process.
+        """
+        api_key = os.getenv("WEATHER_API_KEY", "").strip()
+        normalized_args = []
+        for arg in args:
+            if isinstance(arg, str):
+                normalized_args.append(arg.lower().strip())
+            else:
+                normalized_args.append(str(arg))
+        # Prefix with API key so different keys do not share cached entries.
+        if api_key:
+            return f"{api_key}:" + ":".join(normalized_args)
+        return ":".join(normalized_args)
     @property
     def api_key(self) -> str:
         """Get the API key, raising an error if not configured."""

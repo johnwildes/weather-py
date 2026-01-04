@@ -13,7 +13,6 @@ const DYNAMIC_CACHE = `weather-dynamic-${CACHE_VERSION}`;
 
 // App shell resources to cache immediately
 const APP_SHELL = [
-    '/',
     '/static/css/app.css',
     '/static/js/weather-api.js',
     '/static/js/state-manager.js',

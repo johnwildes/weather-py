@@ -4,7 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Weather App{% endblock %}</title>
-    
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#0078d4">
+    <meta name="description" content="A modern weather forecast application with multi-location support">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Weather">
+    <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='icons/icon-180.png') }}">
+
     <!-- Fluent UI Web Components -->
     <script type="module" src="https://cdn.jsdelivr.net/npm/@fluentui/web-components@2.6.0/dist/web-components.min.js"></script>
     
@@ -48,5 +57,20 @@
     <script src="{{ url_for('static', filename='js/state-manager.js') }}"></script>
     <script src="{{ url_for('static', filename='js/weather-app.js') }}"></script>
     {% block scripts %}{% endblock %}
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/js/sw.js')
+                    .then((registration) => {
+                        console.log('SW registered:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.log('SW registration failed:', error);
+                    });
+            });
+        }
+    </script>
 </body>
 </html>

@@ -218,3 +218,77 @@ def test_home_route_without_location(mock_get, client):
     # Check for empty state content
     assert b'Search for a location' in response.data
 
+
+# PWA Functionality Tests
+def test_manifest_json_accessible(client):
+    """Test that manifest.json is accessible and has correct content-type"""
+    response = client.get('/static/manifest.json')
+    assert response.status_code == 200
+    assert response.content_type == 'application/json'
+    
+    # Verify manifest content
+    manifest_data = response.json
+    assert manifest_data['name'] == 'Weather App'
+    assert manifest_data['short_name'] == 'Weather'
+    assert manifest_data['display'] == 'standalone'
+    assert manifest_data['theme_color'] == '#0078d4'
+    assert 'icons' in manifest_data
+    assert len(manifest_data['icons']) > 0
+
+
+def test_service_worker_accessible(client):
+    """Test that service worker file (sw.js) is accessible"""
+    response = client.get('/static/js/sw.js')
+    assert response.status_code == 200
+    # Content-type should be JavaScript (may include charset)
+    assert 'javascript' in response.content_type.lower()
+    
+    # Verify service worker contains key functionality
+    sw_content = response.data.decode('utf-8')
+    assert 'serviceWorker' in sw_content or 'Service Worker' in sw_content
+    assert 'install' in sw_content
+    assert 'fetch' in sw_content
+    assert 'activate' in sw_content
+
+
+def test_base_html_pwa_meta_tags(client):
+    """Test that base.html includes required PWA meta tags and manifest link"""
+    # Get a page that extends base.html
+    response = client.get('/')
+    assert response.status_code == 200
+    
+    html_content = response.data.decode('utf-8')
+    
+    # Check for PWA meta tags
+    assert 'name="theme-color"' in html_content
+    assert 'content="#0078d4"' in html_content
+    assert 'name="description"' in html_content
+    assert 'name="apple-mobile-web-app-capable"' in html_content
+    assert 'content="yes"' in html_content
+    assert 'name="apple-mobile-web-app-status-bar-style"' in html_content
+    assert 'name="apple-mobile-web-app-title"' in html_content
+    assert 'content="Weather"' in html_content
+    
+    # Check for manifest link
+    assert 'rel="manifest"' in html_content
+    assert 'manifest.json' in html_content
+    
+    # Check for apple touch icon
+    assert 'rel="apple-touch-icon"' in html_content
+
+
+def test_service_worker_registration_script(client):
+    """Test that service worker registration script is present in base.html"""
+    # Get a page that extends base.html
+    response = client.get('/')
+    assert response.status_code == 200
+    
+    html_content = response.data.decode('utf-8')
+    
+    # Check for service worker registration script
+    assert "'serviceWorker' in navigator" in html_content or '"serviceWorker" in navigator' in html_content
+    assert 'navigator.serviceWorker.register' in html_content
+    assert '/static/js/sw.js' in html_content
+    assert 'SW registered' in html_content or 'registration.scope' in html_content
+    assert 'SW registration failed' in html_content or 'error' in html_content
+

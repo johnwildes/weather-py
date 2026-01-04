@@ -317,20 +317,22 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
 
-    const url = event.notification.data?.url || '/';
+    const rawUrl = event.notification.data?.url || '/';
+    // Normalize to an absolute URL so comparison with client.url works reliably
+    const targetUrl = new URL(rawUrl, self.location.origin).href;
 
     event.waitUntil(
         clients.matchAll({ type: 'window', includeUncontrolled: true })
             .then((clientList) => {
                 // Focus existing window if available
                 for (const client of clientList) {
-                    if (client.url === url && 'focus' in client) {
+                    if (client.url === targetUrl && 'focus' in client) {
                         return client.focus();
                     }
                 }
                 // Open new window
                 if (clients.openWindow) {
-                    return clients.openWindow(url);
+                    return clients.openWindow(targetUrl);
                 }
             })
     );

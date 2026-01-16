@@ -9,6 +9,7 @@ import logging
 from flask import Blueprint, request, render_template
 
 from services import WeatherAPIProvider
+from services.safety_features import enrich_weather_data
 
 home_bp = Blueprint('home', __name__)
 logger = logging.getLogger(__name__)
@@ -45,6 +46,8 @@ def home():
         try:
             # Get 10-day forecast data
             weather_data = service.get_detailed_forecast(location, days=10)
+            # Enrich with safety features
+            weather_data = enrich_weather_data(weather_data)
         except Exception as e:
             logger.error(f"Error fetching weather data for location '{location}': {e}", exc_info=True)
             error_message = f"Unable to fetch weather data for '{location}'. Please try a different location."

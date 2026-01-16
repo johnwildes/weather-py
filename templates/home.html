@@ -54,6 +54,76 @@
         </fluent-card>
     </div>
 
+    <!-- Safety Features Section -->
+    {% if weather_data.alerts_info %}
+    <div class="alerts-section">
+        {% for alert in weather_data.alerts_info %}
+        <fluent-card class="alert-card" style="border-left: 4px solid {{ alert.color }};">
+            <div class="alert-header">
+                <span class="alert-icon">{{ alert.icon }}</span>
+                <h3 class="alert-headline">{{ alert.headline }}</h3>
+            </div>
+            <div class="alert-details">
+                <div class="alert-meta">
+                    <span class="alert-severity" style="color: {{ alert.color }};">{{ alert.severity }}</span>
+                    <span class="alert-urgency">{{ alert.urgency }}</span>
+                </div>
+                <p class="alert-description">{{ alert.description }}</p>
+                {% if alert.instruction %}
+                <div class="alert-instruction">
+                    <strong>⚠️ Safety Instructions:</strong> {{ alert.instruction }}
+                </div>
+                {% endif %}
+            </div>
+        </fluent-card>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Safety Metrics Section -->
+    <div class="safety-metrics-section">
+        {% if weather_data.uv_info %}
+        <fluent-card class="safety-card uv-card">
+            <div class="safety-header">
+                <span class="safety-icon">☀️</span>
+                <h3 class="safety-title">UV Index</h3>
+            </div>
+            <div class="safety-content">
+                <div class="safety-value-display">
+                    <span class="safety-value" style="color: {{ weather_data.uv_info.color }};">{{ weather_data.uv_info.value }}</span>
+                    <span class="safety-level" style="background-color: {{ weather_data.uv_info.color }};">{{ weather_data.uv_info.level }}</span>
+                </div>
+                <p class="safety-recommendation">{{ weather_data.uv_info.recommendation }}</p>
+            </div>
+        </fluent-card>
+        {% endif %}
+
+        {% if weather_data.aqi_info %}
+        <fluent-card class="safety-card aqi-card">
+            <div class="safety-header">
+                <span class="safety-icon">🌫️</span>
+                <h3 class="safety-title">Air Quality</h3>
+            </div>
+            <div class="safety-content">
+                <div class="safety-value-display">
+                    <span class="safety-level" style="background-color: {{ weather_data.aqi_info.color }};">{{ weather_data.aqi_info.level }}</span>
+                </div>
+                <p class="safety-recommendation">{{ weather_data.aqi_info.guidance }}</p>
+                <div class="aqi-details">
+                    <div class="aqi-stat">
+                        <span class="aqi-label">PM2.5:</span>
+                        <span class="aqi-value">{{ "%.1f"|format(weather_data.aqi_info.pm2_5) }} µg/m³</span>
+                    </div>
+                    <div class="aqi-stat">
+                        <span class="aqi-label">PM10:</span>
+                        <span class="aqi-value">{{ "%.1f"|format(weather_data.aqi_info.pm10) }} µg/m³</span>
+                    </div>
+                </div>
+            </div>
+        </fluent-card>
+        {% endif %}
+    </div>
+
     <!-- 10-Day Forecast Section -->
     {% if weather_data.forecast and weather_data.forecast.forecastday %}
     <div class="forecast-section">

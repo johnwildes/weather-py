@@ -112,11 +112,11 @@
                 <div class="aqi-details">
                     <div class="aqi-stat">
                         <span class="aqi-label">PM2.5:</span>
-                        <span class="aqi-value">{{ "%.1f"|format(weather_data.aqi_info.pm2_5) }} µg/m³</span>
+                        <span class="aqi-value">{{ "%.1f"|format(weather_data.aqi_info.pm2_5 or 0) }} µg/m³</span>
                     </div>
                     <div class="aqi-stat">
                         <span class="aqi-label">PM10:</span>
-                        <span class="aqi-value">{{ "%.1f"|format(weather_data.aqi_info.pm10) }} µg/m³</span>
+                        <span class="aqi-value">{{ "%.1f"|format(weather_data.aqi_info.pm10 or 0) }} µg/m³</span>
                     </div>
                 </div>
             </div>

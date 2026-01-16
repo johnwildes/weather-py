@@ -76,47 +76,39 @@ def get_aqi_info(current_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     if aqi_value == 0:
         return None
     
+    # Extract PM values once
+    pm25 = air_quality.get('pm2_5', 0)
+    pm10 = air_quality.get('pm10', 0)
+    
     # EPA AQI levels (1-6)
     if aqi_value == 1:
         level = "Good"
         color = "#00E400"  # Green
-        pm25 = air_quality.get('pm2_5', 0)
-        pm10 = air_quality.get('pm10', 0)
         guidance = "Air quality is satisfactory. Air pollution poses little or no risk."
         icon = "🟢"
     elif aqi_value == 2:
         level = "Moderate"
         color = "#FFFF00"  # Yellow
-        pm25 = air_quality.get('pm2_5', 0)
-        pm10 = air_quality.get('pm10', 0)
         guidance = "Acceptable air quality. Unusually sensitive people should consider limiting prolonged outdoor exertion."
         icon = "🟡"
     elif aqi_value == 3:
         level = "Unhealthy for Sensitive Groups"
         color = "#FF7E00"  # Orange
-        pm25 = air_quality.get('pm2_5', 0)
-        pm10 = air_quality.get('pm10', 0)
         guidance = "People with respiratory or heart conditions, elderly, and children should limit prolonged outdoor exertion."
         icon = "🟠"
     elif aqi_value == 4:
         level = "Unhealthy"
         color = "#FF0000"  # Red
-        pm25 = air_quality.get('pm2_5', 0)
-        pm10 = air_quality.get('pm10', 0)
         guidance = "Everyone may begin to experience health effects. Sensitive groups should avoid prolonged outdoor exertion."
         icon = "🔴"
     elif aqi_value == 5:
         level = "Very Unhealthy"
         color = "#8F3F97"  # Purple
-        pm25 = air_quality.get('pm2_5', 0)
-        pm10 = air_quality.get('pm10', 0)
         guidance = "Health alert. Everyone should avoid prolonged outdoor exertion. Sensitive groups should avoid all outdoor activity."
         icon = "🟣"
     else:  # 6
         level = "Hazardous"
         color = "#7E0023"  # Maroon
-        pm25 = air_quality.get('pm2_5', 0)
-        pm10 = air_quality.get('pm10', 0)
         guidance = "Health warning of emergency conditions. Everyone should avoid all outdoor exertion."
         icon = "🟤"
     
@@ -126,8 +118,8 @@ def get_aqi_info(current_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         'color': color,
         'guidance': guidance,
         'icon': icon,
-        'pm2_5': air_quality.get('pm2_5', 0),
-        'pm10': air_quality.get('pm10', 0)
+        'pm2_5': pm25,
+        'pm10': pm10
     }
 
 

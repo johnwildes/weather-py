@@ -1,0 +1,606 @@
+<!-- 
+Safety Features Frontend Examples
+==================================
+
+This file provides copy-paste ready HTML/CSS examples for displaying
+the three critical safety features in your weather application.
+
+These examples use Fluent UI components that are already in your app.
+-->
+
+<!-- ============================================================================
+     EXAMPLE 1: Current Weather Safety Panel
+     Add this to templates/home.html after the current weather card
+     ============================================================================ -->
+
+{% if weather_data and weather_data.current %}
+<div class="safety-panel">
+    <fluent-card class="safety-card">
+        <h3 class="section-title">⚠️ Safety Information</h3>
+        
+        <div class="safety-grid">
+            <!-- UV Index Widget -->
+            {% if weather_data.current.uv is defined %}
+            <div class="safety-widget uv-widget">
+                <div class="widget-header">
+                    <span class="widget-icon">☀️</span>
+                    <span class="widget-title">UV Index</span>
+                </div>
+                <div class="widget-content">
+                    {% set uv = weather_data.current.uv %}
+                    {% if uv <= 2 %}
+                        {% set uv_level = "Low" %}
+                        {% set uv_color = "#289500" %}
+                        {% set uv_recommendation = "Minimal protection needed" %}
+                    {% elif uv <= 5 %}
+                        {% set uv_level = "Moderate" %}
+                        {% set uv_color = "#F7E400" %}
+                        {% set uv_recommendation = "Wear sunscreen SPF 30+" %}
+                    {% elif uv <= 7 %}
+                        {% set uv_level = "High" %}
+                        {% set uv_color = "#F85900" %}
+                        {% set uv_recommendation = "Protection essential" %}
+                    {% elif uv <= 10 %}
+                        {% set uv_level = "Very High" %}
+                        {% set uv_color = "#D8001D" %}
+                        {% set uv_recommendation = "Extra protection required" %}
+                    {% else %}
+                        {% set uv_level = "Extreme" %}
+                        {% set uv_color = "#6B49C8" %}
+                        {% set uv_recommendation = "Avoid sun exposure" %}
+                    {% endif %}
+                    
+                    <div class="uv-badge" style="background-color: {{ uv_color }}; color: white;">
+                        <span class="uv-value">{{ uv|round(0)|int }}</span>
+                        <span class="uv-level">{{ uv_level }}</span>
+                    </div>
+                    <p class="widget-message">{{ uv_recommendation }}</p>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Air Quality Widget -->
+            {% if weather_data.current.air_quality and weather_data.current.air_quality['us-epa-index'] %}
+            <div class="safety-widget aqi-widget">
+                <div class="widget-header">
+                    <span class="widget-icon">🌫️</span>
+                    <span class="widget-title">Air Quality</span>
+                </div>
+                <div class="widget-content">
+                    {% set aqi = weather_data.current.air_quality['us-epa-index'] %}
+                    {% if aqi == 1 %}
+                        {% set aqi_level = "Good" %}
+                        {% set aqi_color = "#00E400" %}
+                        {% set aqi_message = "Air quality is satisfactory" %}
+                    {% elif aqi == 2 %}
+                        {% set aqi_level = "Moderate" %}
+                        {% set aqi_color = "#FFFF00" %}
+                        {% set aqi_message = "Acceptable for most people" %}
+                    {% elif aqi == 3 %}
+                        {% set aqi_level = "Unhealthy for Sensitive Groups" %}
+                        {% set aqi_color = "#FF7E00" %}
+                        {% set aqi_message = "Sensitive groups should limit outdoor activity" %}
+                    {% elif aqi == 4 %}
+                        {% set aqi_level = "Unhealthy" %}
+                        {% set aqi_color = "#FF0000" %}
+                        {% set aqi_message = "Everyone should limit outdoor exertion" %}
+                    {% elif aqi == 5 %}
+                        {% set aqi_level = "Very Unhealthy" %}
+                        {% set aqi_color = "#8F3F97" %}
+                        {% set aqi_message = "Everyone should avoid outdoor exertion" %}
+                    {% else %}
+                        {% set aqi_level = "Hazardous" %}
+                        {% set aqi_color = "#7E0023" %}
+                        {% set aqi_message = "Health warning: Stay indoors" %}
+                    {% endif %}
+                    
+                    <div class="aqi-badge" style="background-color: {{ aqi_color }}; 
+                         color: {% if aqi >= 4 %}white{% else %}black{% endif %};">
+                        <span class="aqi-level">{{ aqi_level }}</span>
+                    </div>
+                    <p class="widget-message">{{ aqi_message }}</p>
+                    {% if weather_data.current.air_quality['pm2_5'] %}
+                    <p class="widget-detail">PM2.5: {{ weather_data.current.air_quality['pm2_5']|round(1) }} μg/m³</p>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Weather Alerts Widget -->
+            {% if weather_data.alerts and weather_data.alerts.alert %}
+            <div class="safety-widget alerts-widget">
+                <div class="widget-header">
+                    <span class="widget-icon">🚨</span>
+                    <span class="widget-title">Active Alerts ({{ weather_data.alerts.alert|length }})</span>
+                </div>
+                <div class="widget-content">
+                    {% for alert in weather_data.alerts.alert %}
+                    <div class="alert-item">
+                        <div class="alert-headline">
+                            <strong>{{ alert.headline }}</strong>
+                        </div>
+                        <div class="alert-severity" style="color: 
+                            {% if 'extreme' in alert.severity.lower() %}#FF0000
+                            {% elif 'severe' in alert.severity.lower() %}#FF4500
+                            {% else %}#FFA500{% endif %};">
+                            {{ alert.severity }} - {{ alert.event }}
+                        </div>
+                        <p class="alert-description">{{ alert.desc[:150] }}{% if alert.desc|length > 150 %}...{% endif %}</p>
+                        {% if alert.instruction %}
+                        <p class="alert-instruction"><strong>Action:</strong> {{ alert.instruction[:100] }}{% if alert.instruction|length > 100 %}...{% endif %}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </fluent-card>
+</div>
+{% endif %}
+
+
+<!-- ============================================================================
+     EXAMPLE 2: Daily Forecast with Safety Icons
+     Add UV and AQI indicators to each forecast day
+     ============================================================================ -->
+
+{% for day in weather_data.forecast.forecastday %}
+<div class="forecast-day-row">
+    <!-- Existing forecast content (date, condition, temps) -->
+    <div class="day-info">
+        <span class="day-name">{{ day.date | format_date }}</span>
+    </div>
+    <div class="day-condition">
+        <img src="https:{{ day.day.condition.icon }}" alt="{{ day.day.condition.text }}" />
+        <span>{{ day.day.condition.text }}</span>
+    </div>
+    <div class="day-temps">
+        <span class="temp-high">{{ day.day.maxtemp_c }}°</span>
+        <span class="temp-low">{{ day.day.mintemp_c }}°</span>
+    </div>
+    
+    <!-- NEW: Safety indicators -->
+    <div class="day-safety-indicators">
+        <!-- UV Indicator -->
+        {% if day.day.uv is defined %}
+        {% if day.day.uv <= 2 %}
+            {% set uv_icon = "🟢" %}
+            {% set uv_bg = "#289500" %}
+        {% elif day.day.uv <= 5 %}
+            {% set uv_icon = "🟡" %}
+            {% set uv_bg = "#F7E400" %}
+        {% elif day.day.uv <= 7 %}
+            {% set uv_icon = "🟠" %}
+            {% set uv_bg = "#F85900" %}
+        {% elif day.day.uv <= 10 %}
+            {% set uv_icon = "🔴" %}
+            {% set uv_bg = "#D8001D" %}
+        {% else %}
+            {% set uv_icon = "🟣" %}
+            {% set uv_bg = "#6B49C8" %}
+        {% endif %}
+        <span class="safety-indicator uv-indicator" 
+              style="background-color: {{ uv_bg }}; color: white;"
+              title="UV Index: {{ day.day.uv|round(0)|int }}">
+            {{ uv_icon }} UV{{ day.day.uv|round(0)|int }}
+        </span>
+        {% endif %}
+        
+        <!-- AQI Indicator (if available in forecast) -->
+        {% if day.day.air_quality and day.day.air_quality['us-epa-index'] %}
+        {% set aqi = day.day.air_quality['us-epa-index'] %}
+        {% if aqi == 1 %}
+            {% set aqi_icon = "🟢" %}
+            {% set aqi_bg = "#00E400" %}
+            {% set aqi_text = "Good" %}
+        {% elif aqi == 2 %}
+            {% set aqi_icon = "🟡" %}
+            {% set aqi_bg = "#FFFF00" %}
+            {% set aqi_text = "Moderate" %}
+        {% elif aqi >= 3 %}
+            {% set aqi_icon = "🟠" %}
+            {% set aqi_bg = "#FF7E00" %}
+            {% set aqi_text = "Unhealthy" %}
+        {% endif %}
+        <span class="safety-indicator aqi-indicator" 
+              style="background-color: {{ aqi_bg }}; color: {% if aqi >= 4 %}white{% else %}black{% endif %};"
+              title="Air Quality: {{ aqi_text }}">
+            {{ aqi_icon }} AQI
+        </span>
+        {% endif %}
+    </div>
+</div>
+{% endfor %}
+
+
+<!-- ============================================================================
+     EXAMPLE 3: Safety Summary Banner (Top of Page)
+     Show critical alerts prominently at the top
+     ============================================================================ -->
+
+{% if weather_data %}
+<!-- Safety Alert Banner -->
+{% set has_high_uv = weather_data.current.uv is defined and weather_data.current.uv >= 8 %}
+{% set has_bad_air = weather_data.current.air_quality and weather_data.current.air_quality['us-epa-index'] >= 4 %}
+{% set has_alerts = weather_data.alerts and weather_data.alerts.alert|length > 0 %}
+
+{% if has_high_uv or has_bad_air or has_alerts %}
+<div class="safety-alert-banner">
+    <fluent-card class="alert-banner-card">
+        <div class="banner-content">
+            <span class="banner-icon">⚠️</span>
+            <div class="banner-messages">
+                {% if has_alerts %}
+                <div class="banner-message critical">
+                    <strong>{{ weather_data.alerts.alert|length }} Active Weather Alert(s)</strong>
+                    - {{ weather_data.alerts.alert[0].event }}
+                </div>
+                {% endif %}
+                {% if has_bad_air %}
+                <div class="banner-message warning">
+                    <strong>Air Quality Alert:</strong> 
+                    Unhealthy air quality - Limit outdoor activities
+                </div>
+                {% endif %}
+                {% if has_high_uv %}
+                <div class="banner-message warning">
+                    <strong>UV Alert:</strong> 
+                    Very high UV index ({{ weather_data.current.uv|round(0)|int }}) - Avoid sun exposure
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </fluent-card>
+</div>
+{% endif %}
+{% endif %}
+
+
+<!-- ============================================================================
+     CSS STYLES
+     Add this to your static/style.css or in a <style> tag in base.html
+     ============================================================================ -->
+
+<style>
+/* Safety Panel */
+.safety-panel {
+    margin-top: 24px;
+}
+
+.safety-card {
+    padding: 24px;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: #323130;
+}
+
+/* Safety Grid Layout */
+.safety-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+/* Safety Widgets */
+.safety-widget {
+    padding: 16px;
+    border: 1px solid #edebe9;
+    border-radius: 8px;
+    background-color: #faf9f8;
+}
+
+.widget-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.widget-icon {
+    font-size: 1.5rem;
+}
+
+.widget-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #323130;
+}
+
+.widget-content {
+    padding-top: 8px;
+}
+
+/* UV Badge */
+.uv-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+}
+
+.uv-value {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.uv-level {
+    font-size: 1rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+/* AQI Badge */
+.aqi-badge {
+    display: inline-block;
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    font-weight: 600;
+}
+
+.aqi-level {
+    font-size: 1rem;
+}
+
+/* Widget Messages */
+.widget-message {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #605e5c;
+    margin: 8px 0;
+}
+
+.widget-detail {
+    font-size: 0.85rem;
+    color: #8a8886;
+    margin-top: 4px;
+}
+
+/* Alert Items */
+.alert-item {
+    padding: 12px;
+    margin-bottom: 12px;
+    background-color: #fff4ce;
+    border-left: 4px solid #ffa500;
+    border-radius: 4px;
+}
+
+.alert-item:last-child {
+    margin-bottom: 0;
+}
+
+.alert-headline {
+    font-size: 1rem;
+    margin-bottom: 8px;
+}
+
+.alert-severity {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.alert-description,
+.alert-instruction {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin: 6px 0;
+}
+
+/* Daily Forecast Safety Indicators */
+.day-safety-indicators {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.safety-indicator {
+    display: inline-block;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Safety Alert Banner */
+.safety-alert-banner {
+    margin-bottom: 20px;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.alert-banner-card {
+    background: linear-gradient(135deg, #fff4ce 0%, #ffe4b5 100%);
+    border-left: 6px solid #ff4500;
+}
+
+.banner-content {
+    display: flex;
+    align-items: start;
+    gap: 12px;
+    padding: 16px;
+}
+
+.banner-icon {
+    font-size: 2rem;
+}
+
+.banner-messages {
+    flex: 1;
+}
+
+.banner-message {
+    margin-bottom: 8px;
+}
+
+.banner-message:last-child {
+    margin-bottom: 0;
+}
+
+.banner-message.critical {
+    color: #a4262c;
+    font-size: 1.1rem;
+}
+
+.banner-message.warning {
+    color: #8a8886;
+    font-size: 0.95rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .safety-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .day-safety-indicators {
+        flex-direction: column;
+        align-items: start;
+        gap: 4px;
+    }
+    
+    .banner-content {
+        flex-direction: column;
+    }
+}
+
+/* Accessibility */
+.safety-indicator:hover {
+    transform: scale(1.05);
+    transition: transform 0.2s ease;
+}
+
+.alert-item:hover {
+    background-color: #ffe8b5;
+    transition: background-color 0.2s ease;
+}
+
+/* Print Styles */
+@media print {
+    .safety-alert-banner {
+        border: 2px solid #ff4500 !important;
+        background: white !important;
+    }
+    
+    .alert-item {
+        border: 1px solid #8a8886;
+        page-break-inside: avoid;
+    }
+}
+</style>
+
+
+<!-- ============================================================================
+     EXAMPLE 4: Compact Safety Summary (for mobile/small screens)
+     ============================================================================ -->
+
+<div class="safety-summary-compact">
+    <div class="summary-items">
+        <!-- UV -->
+        {% if weather_data.current.uv is defined %}
+        <div class="summary-item">
+            <span class="summary-icon">☀️</span>
+            <span class="summary-label">UV</span>
+            <span class="summary-value" 
+                  style="color: {% if weather_data.current.uv >= 8 %}#D8001D
+                                {% elif weather_data.current.uv >= 6 %}#F85900
+                                {% elif weather_data.current.uv >= 3 %}#F7E400
+                                {% else %}#289500{% endif %};">
+                {{ weather_data.current.uv|round(0)|int }}
+            </span>
+        </div>
+        {% endif %}
+        
+        <!-- AQI -->
+        {% if weather_data.current.air_quality and weather_data.current.air_quality['us-epa-index'] %}
+        <div class="summary-item">
+            <span class="summary-icon">🌫️</span>
+            <span class="summary-label">AQI</span>
+            <span class="summary-value"
+                  style="color: {% if weather_data.current.air_quality['us-epa-index'] >= 4 %}#FF0000
+                                {% elif weather_data.current.air_quality['us-epa-index'] >= 3 %}#FF7E00
+                                {% elif weather_data.current.air_quality['us-epa-index'] >= 2 %}#FFFF00
+                                {% else %}#00E400{% endif %};">
+                {% if weather_data.current.air_quality['us-epa-index'] == 1 %}Good
+                {% elif weather_data.current.air_quality['us-epa-index'] == 2 %}Moderate
+                {% else %}Unhealthy{% endif %}
+            </span>
+        </div>
+        {% endif %}
+        
+        <!-- Alerts -->
+        {% if weather_data.alerts and weather_data.alerts.alert|length > 0 %}
+        <div class="summary-item alert">
+            <span class="summary-icon">🚨</span>
+            <span class="summary-label">Alerts</span>
+            <span class="summary-value" style="color: #FF0000;">
+                {{ weather_data.alerts.alert|length }}
+            </span>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.safety-summary-compact {
+    background-color: #f3f2f1;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 16px 0;
+}
+
+.summary-items {
+    display: flex;
+    justify-content: space-around;
+    gap: 16px;
+}
+
+.summary-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.summary-item.alert {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+.summary-icon {
+    font-size: 1.5rem;
+}
+
+.summary-label {
+    font-size: 0.75rem;
+    color: #605e5c;
+    text-transform: uppercase;
+}
+
+.summary-value {
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+</style>

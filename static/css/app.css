@@ -522,3 +522,180 @@ fluent-message-bar {
         display: none;
     }
 }
+
+/* ============================================================================
+   SAFETY FEATURES STYLES
+   ============================================================================ */
+
+/* Alerts Section */
+.alerts-section {
+    margin-bottom: var(--spacing-lg);
+}
+
+.alert-card {
+    background: #fff8e1;
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    margin-bottom: var(--spacing-md);
+    box-shadow: var(--card-shadow);
+}
+
+.alert-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+.alert-icon {
+    font-size: 1.5rem;
+}
+
+.alert-headline {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--app-text-primary);
+    margin: 0;
+}
+
+.alert-details {
+    margin-top: var(--spacing-sm);
+}
+
+.alert-meta {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-sm);
+    font-size: 0.9rem;
+}
+
+.alert-severity {
+    font-weight: 600;
+}
+
+.alert-urgency {
+    color: var(--app-text-secondary);
+}
+
+.alert-description {
+    margin: var(--spacing-sm) 0;
+    line-height: 1.6;
+}
+
+.alert-instruction {
+    background: #ffe0b2;
+    padding: var(--spacing-sm);
+    border-radius: 4px;
+    margin-top: var(--spacing-sm);
+    font-size: 0.9rem;
+}
+
+/* Safety Metrics Section */
+.safety-metrics-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.safety-card {
+    background: var(--app-surface);
+    border-radius: var(--border-radius);
+    padding: var(--spacing-md);
+    box-shadow: var(--card-shadow);
+}
+
+.safety-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+}
+
+.safety-icon {
+    font-size: 1.5rem;
+}
+
+.safety-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--app-text-primary);
+    margin: 0;
+}
+
+.safety-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.safety-value-display {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+}
+
+.safety-value {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+.safety-level {
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: white;
+}
+
+.safety-recommendation {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    color: var(--app-text-secondary);
+    margin: 0;
+}
+
+/* AQI Specific Styles */
+.aqi-details {
+    display: flex;
+    gap: var(--spacing-md);
+    margin-top: var(--spacing-sm);
+    padding-top: var(--spacing-sm);
+    border-top: 1px solid #e0e0e0;
+}
+
+.aqi-stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.aqi-label {
+    font-size: 0.75rem;
+    color: var(--app-text-secondary);
+    text-transform: uppercase;
+}
+
+.aqi-value {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--app-text-primary);
+}
+
+/* Responsive adjustments for safety features */
+@media (max-width: 768px) {
+    .safety-metrics-section {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .safety-value {
+        font-size: 1.5rem;
+    }
+    
+    .alert-card {
+        padding: var(--spacing-sm);
+    }
+}

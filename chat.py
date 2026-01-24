@@ -9,7 +9,11 @@ from flask import Blueprint, request, jsonify, Response, stream_with_context
 import os
 import json
 import requests
+import logging
 from typing import Generator
+
+# Configure logging for chat module
+logger = logging.getLogger(__name__)
 
 chat_bp = Blueprint('chat', __name__)
 
@@ -89,8 +93,12 @@ def stream_foundry_response(message: str, context: dict) -> Generator[str, None,
     """
     config = get_foundry_config()
     
+    logger.info(f"Chat request - Message: {message[:50]}...")
+    logger.info(f"Config - API Key present: {bool(config['apiKey'])}, Endpoint: {config['endpoint']}")
+    
     if not config['apiKey']:
-        yield 'data: {"error": "Foundry API key not configured"}\n\n'
+        logger.error("Foundry API key not configured")
+        yield 'data: {"error": "Foundry API key not configured. Please set FOUNDRY_API_KEY in your .env file."}\n\n'
         yield 'data: [DONE]\n\n'
         return
 
@@ -118,6 +126,7 @@ def stream_foundry_response(message: str, context: dict) -> Generator[str, None,
     }
 
     try:
+        logger.info(f"Sending request to {config['endpoint']}")
         response = requests.post(
             config['endpoint'],
             headers=headers,
@@ -126,8 +135,22 @@ def stream_foundry_response(message: str, context: dict) -> Generator[str, None,
             timeout=30
         )
         
+        logger.info(f"Response status: {response.status_code}")
+        
         if response.status_code != 200:
-            yield f'data: {{"error": "Foundry API error: {response.status_code}"}}\n\n'
+            error_body = ""
+            try:
+                error_body = response.text
+                logger.error(f"API error response: {error_body}")
+            except:
+                pass
+            
+            error_msg = f"Foundry API error (HTTP {response.status_code})"
+            if error_body:
+                error_msg += f": {error_body[:200]}"
+            
+            logger.error(error_msg)
+            yield f'data: {{"error": {json.dumps(error_msg)}}}\n\n'
             yield 'data: [DONE]\n\n'
             return
 
@@ -154,12 +177,17 @@ def stream_foundry_response(message: str, context: dict) -> Generator[str, None,
                         continue
 
         yield 'data: [DONE]\n\n'
+        logger.info("Stream completed successfully")
         
     except requests.exceptions.RequestException as e:
-        yield f'data: {{"error": "Network error: {str(e)}"}}\n\n'
+        error_msg = f"Network error: {str(e)}"
+        logger.error(error_msg, exc_info=True)
+        yield f'data: {{"error": {json.dumps(error_msg)}}}\n\n'
         yield 'data: [DONE]\n\n'
     except Exception as e:
-        yield f'data: {{"error": "Unexpected error: {str(e)}"}}\n\n'
+        error_msg = f"Unexpected error: {str(e)}"
+        logger.error(error_msg, exc_info=True)
+        yield f'data: {{"error": {json.dumps(error_msg)}}}\n\n'
         yield 'data: [DONE]\n\n'
 
 

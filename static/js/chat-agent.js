@@ -186,8 +186,17 @@ class ChatAgent {
             await this.streamChatResponse(message, context, typingId);
         } catch (error) {
             this.removeMessage(typingId);
-            this.addMessage('assistant', `Sorry, I encountered an error: ${error.message}`);
+            const errorMsg = `Sorry, I encountered an error: ${error.message}`;
+            this.addMessage('assistant', errorMsg);
             console.error('Chat error:', error);
+            
+            // Log to help with debugging
+            console.error('Error details:', {
+                message: error.message,
+                stack: error.stack,
+                apiKey: this.apiKey ? 'configured' : 'not configured',
+                endpoint: this.foundryEndpoint
+            });
         }
     }
 
@@ -269,13 +278,24 @@ class ChatAgent {
 
                         try {
                             const parsed = JSON.parse(data);
+                            
+                            // Handle error messages from backend
+                            if (parsed.error) {
+                                console.error('Chat API error:', parsed.error);
+                                fullText = `Error: ${parsed.error}`;
+                                contentElement.textContent = fullText;
+                                contentElement.style.color = '#d13438'; // Red color for errors
+                                this.scrollToBottom();
+                                break;
+                            }
+                            
                             if (parsed.content) {
                                 fullText += parsed.content;
                                 contentElement.textContent = fullText;
                                 this.scrollToBottom();
                             }
                         } catch (e) {
-                            // Skip invalid JSON
+                            console.warn('Failed to parse SSE data:', data, e);
                         }
                     }
                 }

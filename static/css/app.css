@@ -14,6 +14,14 @@
     --spacing-md: 16px;
     --spacing-lg: 24px;
     --spacing-xl: 32px;
+    
+    /* Standard safety/status colors - darker shades */
+    --color-green: #1e7b34;
+    --color-yellow: #b8860b;
+    --color-orange: #c65102;
+    --color-red: #a31621;
+    --color-purple: #5a3d8a;
+    --color-maroon: #5c0019;
 }
 
 /* Base Styles */
@@ -50,6 +58,7 @@ body {
 
 .search-bar-container {
     width: 100%;
+    position: relative;
 }
 
 .search-card {
@@ -57,7 +66,6 @@ body {
     border-radius: var(--border-radius);
     box-shadow: var(--card-shadow);
     padding: var(--spacing-xl);
-    overflow: visible !important;
 }
 
 /* Ensure Fluent card doesn't clip autocomplete */
@@ -113,12 +121,10 @@ fluent-card.search-card::part(control) {
     min-width: 100px;
 }
 
-/* Autocomplete Dropdown */
+/* Autocomplete Dropdown - positioned outside fluent-card to avoid Shadow DOM clipping */
 .autocomplete-dropdown {
     position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
+    /* top, left, width set dynamically by JavaScript */
     background: var(--app-surface);
     border: 1px solid #e1e1e1;
     border-radius: var(--border-radius);
@@ -126,7 +132,9 @@ fluent-card.search-card::part(control) {
     z-index: 9999;
     max-height: 300px;
     overflow-y: auto;
-    margin-top: 4px;
+}
+.autocomplete-results {
+    overflow-y: auto;
 }
 
 .autocomplete-item {

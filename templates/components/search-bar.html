@@ -4,7 +4,7 @@
         <div class="search-content">
             <h1 class="app-title">Weather Forecast</h1>
             <div class="search-input-row">
-                <div class="search-input-wrapper">
+                <div class="search-input-wrapper" id="searchInputWrapper">
                     <fluent-text-field 
                         id="locationSearch" 
                         type="search"
@@ -13,10 +13,6 @@
                         size="large"
                         autocomplete="off">
                     </fluent-text-field>
-                    <!-- Autocomplete dropdown -->
-                    <div class="autocomplete-dropdown" id="autocompleteDropdown" hidden>
-                        <div class="autocomplete-results" id="autocompleteResults"></div>
-                    </div>
                 </div>
                 <fluent-button 
                     id="searchBtn" 
@@ -27,4 +23,8 @@
             </div>
         </div>
     </fluent-card>
+    <!-- Autocomplete dropdown moved outside fluent-card to avoid Shadow DOM clipping -->
+    <div class="autocomplete-dropdown" id="autocompleteDropdown" hidden>
+        <div class="autocomplete-results" id="autocompleteResults"></div>
+    </div>
 </div>

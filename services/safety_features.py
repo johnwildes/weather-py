@@ -25,27 +25,27 @@ def get_uv_info(current_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     
     if uv_value <= 2:
         level = "Low"
-        color = "#289500"  # Green
+        color = "#1e7b34"  # Green (dark)
         recommendation = "Minimal protection needed. Wear sunglasses on bright days."
         icon = "🟢"
     elif uv_value <= 5:
         level = "Moderate"
-        color = "#F7E400"  # Yellow
+        color = "#b8860b"  # Yellow (dark)
         recommendation = "Protection required. Wear sunscreen SPF 30+, hat, and sunglasses."
         icon = "🟡"
     elif uv_value <= 7:
         level = "High"
-        color = "#F85900"  # Orange
+        color = "#c65102"  # Orange (dark)
         recommendation = "Protection essential. Seek shade during midday. Sunscreen, hat, and sunglasses required."
         icon = "🟠"
     elif uv_value <= 10:
         level = "Very High"
-        color = "#D8001D"  # Red
+        color = "#a31621"  # Red (dark)
         recommendation = "Extra protection required. Avoid sun 10am-4pm. Sunscreen SPF 50+, protective clothing required."
         icon = "🔴"
     else:  # 11+
         level = "Extreme"
-        color = "#6B49C8"  # Purple
+        color = "#5a3d8a"  # Purple (dark)
         recommendation = "Take all precautions. Avoid sun exposure. Unprotected skin can burn in minutes."
         icon = "🟣"
     
@@ -83,32 +83,32 @@ def get_aqi_info(current_data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     # EPA AQI levels (1-6)
     if aqi_value == 1:
         level = "Good"
-        color = "#00E400"  # Green
+        color = "#1e7b34"  # Green (dark)
         guidance = "Air quality is satisfactory. Air pollution poses little or no risk."
         icon = "🟢"
     elif aqi_value == 2:
         level = "Moderate"
-        color = "#FFFF00"  # Yellow
+        color = "#b8860b"  # Yellow (dark)
         guidance = "Acceptable air quality. Unusually sensitive people should consider limiting prolonged outdoor exertion."
         icon = "🟡"
     elif aqi_value == 3:
         level = "Unhealthy for Sensitive Groups"
-        color = "#FF7E00"  # Orange
+        color = "#c65102"  # Orange (dark)
         guidance = "People with respiratory or heart conditions, elderly, and children should limit prolonged outdoor exertion."
         icon = "🟠"
     elif aqi_value == 4:
         level = "Unhealthy"
-        color = "#FF0000"  # Red
+        color = "#a31621"  # Red (dark)
         guidance = "Everyone may begin to experience health effects. Sensitive groups should avoid prolonged outdoor exertion."
         icon = "🔴"
     elif aqi_value == 5:
         level = "Very Unhealthy"
-        color = "#8F3F97"  # Purple
+        color = "#5a3d8a"  # Purple (dark)
         guidance = "Health alert. Everyone should avoid prolonged outdoor exertion. Sensitive groups should avoid all outdoor activity."
         icon = "🟣"
     else:  # 6
         level = "Hazardous"
-        color = "#7E0023"  # Maroon
+        color = "#5c0019"  # Maroon (dark)
         guidance = "Health warning of emergency conditions. Everyone should avoid all outdoor exertion."
         icon = "🟤"
     
@@ -141,19 +141,19 @@ def get_alerts_info(alerts_data: Dict[str, Any]) -> List[Dict[str, Any]]:
     formatted_alerts = []
     
     for alert in alert_list:
-        # Determine severity color
+        # Determine severity color (using standard dark colors)
         severity = alert.get('severity', '').lower()
         if severity == 'extreme':
-            color = "#D8001D"  # Red
+            color = "#a31621"  # Red (dark)
             icon = "🔴"
         elif severity == 'severe':
-            color = "#F85900"  # Orange
+            color = "#c65102"  # Orange (dark)
             icon = "🟠"
         elif severity == 'moderate':
-            color = "#F7E400"  # Yellow
+            color = "#b8860b"  # Yellow (dark)
             icon = "🟡"
         else:
-            color = "#289500"  # Green
+            color = "#1e7b34"  # Green (dark)
             icon = "🟢"
         
         formatted_alerts.append({

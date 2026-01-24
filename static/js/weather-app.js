@@ -152,12 +152,22 @@ class WeatherApp {
     showAutocomplete(results) {
         const dropdown = this.elements.autocompleteDropdown;
         const container = this.elements.autocompleteResults;
+        const searchInput = this.elements.locationSearch;
         
         if (!dropdown || !container) return;
 
         if (!results || results.length === 0) {
             this.hideAutocomplete();
             return;
+        }
+
+        // Position dropdown below the search input
+        if (searchInput) {
+            const inputRect = searchInput.getBoundingClientRect();
+            const containerRect = dropdown.parentElement.getBoundingClientRect();
+            dropdown.style.top = (inputRect.bottom - containerRect.top + 4) + 'px';
+            dropdown.style.left = (inputRect.left - containerRect.left) + 'px';
+            dropdown.style.width = inputRect.width + 'px';
         }
 
         container.innerHTML = '';

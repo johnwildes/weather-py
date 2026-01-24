@@ -5,6 +5,7 @@ class WeatherApp {
     constructor() {
         this.stateManager = new StateManager();
         this.weatherAPI = new WeatherAPI();
+        this.chatAgent = null;
         this.elements = {};
         this.autocompleteTimeout = null;
         this.init();
@@ -15,6 +16,37 @@ class WeatherApp {
         this.setupEventListeners();
         this.loadRecentCities();
         this.disableAutofillOnSearch();
+        this.storeCurrentWeatherData();
+        this.initializeChatAgent();
+    }
+
+    storeCurrentWeatherData() {
+        // Store server-rendered weather data in state manager for chat agent
+        if (window.currentWeatherData) {
+            const data = window.currentWeatherData;
+            const locationKey = data.location.name;
+            
+            // Store the weather data in state manager
+            this.stateManager.setWeatherData(locationKey, data);
+            
+            // Set as the currently selected/viewed location
+            this.stateManager.setSelectedLocation(locationKey);
+            
+            // Also store the full display name
+            const displayName = [data.location.name, data.location.region, data.location.country]
+                .filter(Boolean)
+                .join(', ');
+            
+            // Add to recent locations for context
+            this.stateManager.addToRecentLocations(locationKey, displayName);
+        }
+    }
+
+    initializeChatAgent() {
+        // Initialize chat agent if ChatAgent class is available
+        if (window.ChatAgent) {
+            this.chatAgent = new ChatAgent(this.stateManager);
+        }
     }
 
     // Disable password manager autofill on search input

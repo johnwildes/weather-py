@@ -13,6 +13,10 @@ from typing import Generator
 
 chat_bp = Blueprint('chat', __name__)
 
+# Configuration constants
+MAX_RESPONSE_TOKENS = 500  # Maximum tokens for chat responses
+RESPONSE_TEMPERATURE = 0.7  # Temperature for response generation
+
 
 def get_foundry_config():
     """Get Microsoft Foundry configuration from environment."""
@@ -104,8 +108,8 @@ def stream_foundry_response(message: str, context: dict) -> Generator[str, None,
             }
         ],
         "stream": True,
-        "temperature": 0.7,
-        "max_tokens": 500
+        "temperature": RESPONSE_TEMPERATURE,
+        "max_tokens": MAX_RESPONSE_TOKENS
     }
 
     headers = {

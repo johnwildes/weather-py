@@ -9,6 +9,7 @@ class ChatAgent {
         this.isStreaming = false;
         this.apiKey = null;
         this.foundryEndpoint = null;
+        this.MAX_CHAT_HISTORY = 50; // Maximum messages to keep in history
         this.init();
     }
 
@@ -294,7 +295,7 @@ class ChatAgent {
     }
 
     addMessage(role, content) {
-        const messageId = `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        const messageId = `msg-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
         const messageDiv = document.createElement('div');
         messageDiv.id = messageId;
         messageDiv.className = `chat-message ${role}-message`;
@@ -362,7 +363,7 @@ class ChatAgent {
 
     saveChatHistory() {
         try {
-            localStorage.setItem('chat_history', JSON.stringify(this.messages.slice(-50))); // Keep last 50 messages
+            localStorage.setItem('chat_history', JSON.stringify(this.messages.slice(-this.MAX_CHAT_HISTORY)));
         } catch (error) {
             console.error('Failed to save chat history:', error);
         }

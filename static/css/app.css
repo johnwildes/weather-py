@@ -221,6 +221,39 @@ body {
     gap: var(--spacing-sm);
 }
 
+/* Temperature Unit Toggle */
+.temp-unit-toggle {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: var(--app-background);
+    border-radius: 20px;
+    margin-right: var(--spacing-sm);
+}
+
+.temp-unit-toggle .unit-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--app-text-secondary);
+    transition: color 0.2s ease;
+    cursor: default;
+}
+
+.temp-unit-toggle .unit-label.active {
+    color: var(--app-primary-color);
+}
+
+.temp-unit-toggle fluent-switch {
+    --switch-height: 20px;
+    margin: 0;
+}
+
+.temp-unit-toggle fluent-switch::part(switch) {
+    height: 20px;
+    width: 36px;
+}
+
 .current-condition-icon {
     width: 64px;
     height: 64px;
@@ -502,6 +535,15 @@ fluent-message-bar {
     
     .current-temp-display {
         align-self: flex-start;
+    }
+    
+    .temp-unit-toggle {
+        padding: var(--spacing-xs);
+        gap: 2px;
+    }
+    
+    .temp-unit-toggle .unit-label {
+        font-size: 0.75rem;
     }
     
     .current-temp {

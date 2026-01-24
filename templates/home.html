@@ -24,10 +24,17 @@
                     <p class="region-country">{{ weather_data.location.region }}{% if weather_data.location.region and weather_data.location.country %}, {% endif %}{{ weather_data.location.country }}</p>
                 </div>
                 <div class="current-temp-display">
+                    <div class="temp-unit-toggle">
+                        <span class="unit-label" data-unit="celsius">°C</span>
+                        <fluent-switch id="tempUnitToggle" aria-label="Toggle temperature unit"></fluent-switch>
+                        <span class="unit-label" data-unit="fahrenheit">°F</span>
+                    </div>
                     <img src="https:{{ weather_data.current.condition.icon }}" 
                          alt="{{ weather_data.current.condition.text }}" 
                          class="current-condition-icon" />
-                    <span class="current-temp">{{ weather_data.current.temp_c }}°C</span>
+                    <span class="current-temp" 
+                          data-temp-c="{{ weather_data.current.temp_c }}" 
+                          data-temp-f="{{ weather_data.current.temp_f }}">{{ weather_data.current.temp_c }}°C</span>
                 </div>
             </div>
             <div class="current-weather-details">
@@ -35,7 +42,9 @@
                 <div class="weather-stats">
                     <div class="stat-item">
                         <span class="stat-label">Feels like</span>
-                        <span class="stat-value">{{ weather_data.current.feelslike_c }}°C</span>
+                        <span class="stat-value temp-value" 
+                              data-temp-c="{{ weather_data.current.feelslike_c }}" 
+                              data-temp-f="{{ weather_data.current.feelslike_f }}">{{ weather_data.current.feelslike_c }}°C</span>
                     </div>
                     <div class="stat-item">
                         <span class="stat-label">Humidity</span>
@@ -144,12 +153,16 @@
                         <span class="condition-text">{{ day.day.condition.text }}</span>
                     </div>
                     <div class="day-temps">
-                        <span class="temp-high">{{ day.day.maxtemp_c }}°</span>
+                        <span class="temp-high temp-value" 
+                              data-temp-c="{{ day.day.maxtemp_c }}" 
+                              data-temp-f="{{ day.day.maxtemp_f }}">{{ day.day.maxtemp_c }}°</span>
                         <div class="temp-bar">
                             {% set temp_width = ((day.day.maxtemp_c - day.day.mintemp_c) / 30 * 100)|int %}
                             <div class="temp-bar-fill" style="width: {{ [[temp_width, 0]|max, 100]|min }}%;"></div>
                         </div>
-                        <span class="temp-low">{{ day.day.mintemp_c }}°</span>
+                        <span class="temp-low temp-value" 
+                              data-temp-c="{{ day.day.mintemp_c }}" 
+                              data-temp-f="{{ day.day.mintemp_f }}">{{ day.day.mintemp_c }}°</span>
                     </div>
                     <div class="day-rain">
                         {% if day.day.daily_chance_of_rain > 0 %}
@@ -183,5 +196,60 @@ function toggleAlertCard(header) {
     const card = header.closest('.alert-card');
     card.classList.toggle('collapsed');
 }
+
+// Temperature Unit Toggle
+(function() {
+    const toggle = document.getElementById('tempUnitToggle');
+    if (!toggle) return;
+
+    const STORAGE_KEY = 'weather_temp_unit';
+    const celsiusLabel = document.querySelector('.unit-label[data-unit="celsius"]');
+    const fahrenheitLabel = document.querySelector('.unit-label[data-unit="fahrenheit"]');
+
+    // Load saved preference
+    const savedUnit = localStorage.getItem(STORAGE_KEY) || 'celsius';
+    const isFahrenheit = savedUnit === 'fahrenheit';
+    toggle.checked = isFahrenheit;
+    updateTemperatures(isFahrenheit);
+    updateLabels(isFahrenheit);
+
+    // Listen for toggle changes
+    toggle.addEventListener('change', function() {
+        const useFahrenheit = toggle.checked;
+        localStorage.setItem(STORAGE_KEY, useFahrenheit ? 'fahrenheit' : 'celsius');
+        updateTemperatures(useFahrenheit);
+        updateLabels(useFahrenheit);
+    });
+
+    function updateLabels(useFahrenheit) {
+        if (celsiusLabel && fahrenheitLabel) {
+            celsiusLabel.classList.toggle('active', !useFahrenheit);
+            fahrenheitLabel.classList.toggle('active', useFahrenheit);
+        }
+    }
+
+    function updateTemperatures(useFahrenheit) {
+        // Update main temperature display
+        const mainTemp = document.querySelector('.current-temp');
+        if (mainTemp) {
+            const tempC = parseFloat(mainTemp.dataset.tempC);
+            const tempF = parseFloat(mainTemp.dataset.tempF);
+            mainTemp.textContent = useFahrenheit ? `${tempF}°F` : `${tempC}°C`;
+        }
+
+        // Update all temp-value elements (feels like, forecast highs/lows)
+        document.querySelectorAll('.temp-value').forEach(el => {
+            const tempC = parseFloat(el.dataset.tempC);
+            const tempF = parseFloat(el.dataset.tempF);
+            // Check if it's a forecast temp (no unit suffix) or other (with unit suffix)
+            const isForecastTemp = el.classList.contains('temp-high') || el.classList.contains('temp-low');
+            if (isForecastTemp) {
+                el.textContent = useFahrenheit ? `${tempF}°` : `${tempC}°`;
+            } else {
+                el.textContent = useFahrenheit ? `${tempF}°F` : `${tempC}°C`;
+            }
+        });
+    }
+})();
 </script>
 {% endblock %}

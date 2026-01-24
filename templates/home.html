@@ -63,34 +63,7 @@
         </fluent-card>
     </div>
 
-    <!-- Safety Features Section -->
-    {% if weather_data.alerts_info %}
-    <div class="alerts-section">
-        {% for alert in weather_data.alerts_info %}
-        <fluent-card class="alert-card collapsed" style="border-left: 8px solid {{ alert.color }};">
-            <div class="alert-header" onclick="toggleAlertCard(this)">
-                <span class="alert-icon">{{ alert.icon }}</span>
-                <h3 class="alert-headline">{{ alert.headline }}</h3>
-                <span class="alert-toggle-icon">▼</span>
-            </div>
-            <div class="alert-details">
-                <div class="alert-meta">
-                    <span class="alert-severity" style="color: {{ alert.color }};">{{ alert.severity }}</span>
-                    <span class="alert-urgency">{{ alert.urgency }}</span>
-                </div>
-                <p class="alert-description">{{ alert.description }}</p>
-                {% if alert.instruction %}
-                <div class="alert-instruction">
-                    <strong>⚠️ Safety Instructions:</strong> {{ alert.instruction }}
-                </div>
-                {% endif %}
-            </div>
-        </fluent-card>
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    <!-- Safety Metrics Section -->
+    <!-- Safety Metrics Section (moved after forecast) -->
     <div class="safety-metrics-section">
         {% if weather_data.uv_info %}
         <fluent-card class="safety-card uv-card">
@@ -175,6 +148,36 @@
         </fluent-card>
     </div>
     {% endif %}
+
+
+    <!-- Safety Features Section (moved after forecast) -->
+    {% if weather_data.alerts_info %}
+    <div class="alerts-section">
+        {% for alert in weather_data.alerts_info %}
+        <fluent-card class="alert-card collapsed" style="border-left: 8px solid {{ alert.color }};">
+            <div class="alert-header" onclick="toggleAlertCard(this)">
+                <span class="alert-icon">{{ alert.icon }}</span>
+                <h3 class="alert-headline">{{ alert.headline }}</h3>
+                <span class="alert-toggle-icon">▼</span>
+            </div>
+            <div class="alert-details">
+                <div class="alert-meta">
+                    <span class="alert-severity" style="color: {{ alert.color }};">{{ alert.severity }}</span>
+                    <span class="alert-urgency">{{ alert.urgency }}</span>
+                </div>
+                <p class="alert-description">{{ alert.description }}</p>
+                {% if alert.instruction %}
+                <div class="alert-instruction">
+                    <strong>⚠️ Safety Instructions:</strong> {{ alert.instruction }}
+                </div>
+                {% endif %}
+            </div>
+        </fluent-card>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+
     {% else %}
     <!-- Empty State -->
     <div class="empty-state">

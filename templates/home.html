@@ -242,8 +242,8 @@ function toggleAlertCard(header) {
             const tempC = parseFloat(el.dataset.tempC);
             const tempF = parseFloat(el.dataset.tempF);
             // Check if it's a forecast temp (no unit suffix) or other (with unit suffix)
-            const isForcastTemp = el.classList.contains('temp-high') || el.classList.contains('temp-low');
-            if (isForcastTemp) {
+            const isForecastTemp = el.classList.contains('temp-high') || el.classList.contains('temp-low');
+            if (isForecastTemp) {
                 el.textContent = useFahrenheit ? `${tempF}°` : `${tempC}°`;
             } else {
                 el.textContent = useFahrenheit ? `${tempF}°F` : `${tempC}°C`;

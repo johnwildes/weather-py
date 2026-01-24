@@ -58,10 +58,11 @@
     {% if weather_data.alerts_info %}
     <div class="alerts-section">
         {% for alert in weather_data.alerts_info %}
-        <fluent-card class="alert-card" style="border-left: 4px solid {{ alert.color }};">
-            <div class="alert-header">
+        <fluent-card class="alert-card collapsed" style="border-left: 8px solid {{ alert.color }};">
+            <div class="alert-header" onclick="toggleAlertCard(this)">
                 <span class="alert-icon">{{ alert.icon }}</span>
                 <h3 class="alert-headline">{{ alert.headline }}</h3>
+                <span class="alert-toggle-icon">▼</span>
             </div>
             <div class="alert-details">
                 <div class="alert-meta">
@@ -174,4 +175,13 @@
     </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function toggleAlertCard(header) {
+    const card = header.closest('.alert-card');
+    card.classList.toggle('collapsed');
+}
+</script>
 {% endblock %}

@@ -545,6 +545,40 @@ fluent-message-bar {
     align-items: center;
     gap: var(--spacing-sm);
     margin-bottom: var(--spacing-sm);
+    cursor: pointer;
+    user-select: none;
+}
+
+.alert-header:hover {
+    opacity: 0.8;
+}
+
+.alert-toggle-icon {
+    margin-left: auto;
+    font-size: 0.8rem;
+    transition: transform 0.3s ease;
+    color: var(--app-text-secondary);
+}
+
+.alert-card.collapsed .alert-toggle-icon {
+    transform: rotate(-90deg);
+}
+
+.alert-card.collapsed .alert-header {
+    margin-bottom: 0;
+}
+
+.alert-card .alert-details {
+    max-height: 500px;
+    overflow: hidden;
+    transition: max-height 0.3s ease, opacity 0.3s ease, margin-top 0.3s ease;
+    opacity: 1;
+}
+
+.alert-card.collapsed .alert-details {
+    max-height: 0;
+    opacity: 0;
+    margin-top: 0;
 }
 
 .alert-icon {

@@ -45,7 +45,7 @@ jobs:
           --resource-group ${{ secrets.RESOURCE_GROUP }} \
           --image ghcr.io/${{ secrets.GHCR_USERNAME }}/weather-py:latest \
           --set-env-vars \
-            "AZURE_OPENAI_API_KEY=secretref:azure-openai-api-key" \
+            "AZURE_OPENAI_API_KEY=${{secrets.AZURE_OPENAI_API_KEY}}" \
             "AZURE_OPENAI_ENDPOINT=${{ secrets.AZURE_OPENAI_ENDPOINT }}" \
             "AZURE_OPENAI_DEPLOYMENT=${{ secrets.AZURE_OPENAI_DEPLOYMENT }}" \
             "AZURE_OPENAI_API_VERSION=2024-10-21"

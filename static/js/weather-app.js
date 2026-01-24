@@ -5,6 +5,7 @@ class WeatherApp {
     constructor() {
         this.stateManager = new StateManager();
         this.weatherAPI = new WeatherAPI();
+        this.chatAgent = null;
         this.elements = {};
         this.autocompleteTimeout = null;
         this.init();
@@ -15,6 +16,14 @@ class WeatherApp {
         this.setupEventListeners();
         this.loadRecentCities();
         this.disableAutofillOnSearch();
+        this.initializeChatAgent();
+    }
+
+    initializeChatAgent() {
+        // Initialize chat agent if ChatAgent class is available
+        if (window.ChatAgent) {
+            this.chatAgent = new ChatAgent(this.stateManager);
+        }
     }
 
     // Disable password manager autofill on search input

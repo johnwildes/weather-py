@@ -22,6 +22,7 @@
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/chat-agent.css') }}">
     
     {% block head %}{% endblock %}
 </head>
@@ -55,6 +56,7 @@
     <!-- Core JavaScript -->
     <script src="{{ url_for('static', filename='js/weather-api.js') }}"></script>
     <script src="{{ url_for('static', filename='js/state-manager.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/chat-agent.js') }}"></script>
     <script src="{{ url_for('static', filename='js/weather-app.js') }}"></script>
     {% block scripts %}{% endblock %}
 

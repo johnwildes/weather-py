@@ -19,6 +19,7 @@ from dotenv import load_dotenv
 # Import blueprints
 from forecast import forecast_bp  # Import forecast blueprint
 from home import home_bp  # Import home blueprint
+from chat import chat_bp  # Import chat blueprint
 from datetime import datetime, timedelta
 
 # Load environment variables from a .env file if it exists
@@ -57,6 +58,7 @@ def format_date_filter(date_string):
 # Register blueprints
 app.register_blueprint(forecast_bp, url_prefix='/forecast')
 app.register_blueprint(home_bp, url_prefix='/')
+app.register_blueprint(chat_bp, url_prefix='/api/chat')
 
 # Register API routes directly to the main app for cleaner URLs
 from forecast import get_bulk_weather, validate_location, search_locations, get_detailed_forecast, get_hourly_forecast

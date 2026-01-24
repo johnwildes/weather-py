@@ -57,6 +57,16 @@ body {
     border-radius: var(--border-radius);
     box-shadow: var(--card-shadow);
     padding: var(--spacing-xl);
+    overflow: visible !important;
+}
+
+/* Ensure Fluent card doesn't clip autocomplete */
+fluent-card.search-card {
+    overflow: visible !important;
+}
+
+fluent-card.search-card::part(control) {
+    overflow: visible !important;
 }
 
 .search-content {
@@ -82,11 +92,20 @@ body {
 .search-input-wrapper {
     flex: 1;
     position: relative;
+    overflow: visible !important;
 }
 
 .search-input-wrapper fluent-text-field,
 .search-input-wrapper fluent-search {
     width: 100%;
+}
+
+.search-content {
+    overflow: visible !important;
+}
+
+.search-input-row {
+    overflow: visible !important;
 }
 
 #searchBtn {
@@ -103,8 +122,8 @@ body {
     background: var(--app-surface);
     border: 1px solid #e1e1e1;
     border-radius: var(--border-radius);
-    box-shadow: var(--card-shadow);
-    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 9999;
     max-height: 300px;
     overflow-y: auto;
     margin-top: 4px;

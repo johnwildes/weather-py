@@ -3,3 +3,4 @@ requests
 dotenv
 pytest
 cachetools
+openai>=1.0.0

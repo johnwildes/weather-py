@@ -200,6 +200,53 @@ function toggleAlertCard(header) {
     card.classList.toggle('collapsed');
 }
 
+// Store current weather data for chat agent context
+{% if weather_data %}
+window.currentWeatherData = {
+    location: {
+        name: {{ weather_data.location.name | tojson }},
+        region: {{ weather_data.location.region | tojson }},
+        country: {{ weather_data.location.country | tojson }}
+    },
+    current: {
+        temp_c: {{ weather_data.current.temp_c }},
+        temp_f: {{ weather_data.current.temp_f }},
+        feelslike_c: {{ weather_data.current.feelslike_c }},
+        feelslike_f: {{ weather_data.current.feelslike_f }},
+        humidity: {{ weather_data.current.humidity }},
+        wind_kph: {{ weather_data.current.wind_kph }},
+        wind_mph: {{ weather_data.current.wind_mph | default(0) }},
+        vis_km: {{ weather_data.current.vis_km }},
+        condition: {
+            text: {{ weather_data.current.condition.text | tojson }}
+        },
+        uv: {{ weather_data.current.uv | default(0) }},
+        pressure_mb: {{ weather_data.current.pressure_mb | default(1013) }}
+    },
+    forecast: {{ weather_data.forecast | tojson }}
+    {% if weather_data.uv_info %},
+    uv_info: {
+        value: {{ weather_data.uv_info.value }},
+        level: {{ weather_data.uv_info.level | tojson }},
+        recommendation: {{ weather_data.uv_info.recommendation | tojson }}
+    }
+    {% endif %}
+    {% if weather_data.aqi_info %},
+    aqi_info: {
+        level: {{ weather_data.aqi_info.level | tojson }},
+        guidance: {{ weather_data.aqi_info.guidance | tojson }},
+        pm2_5: {{ weather_data.aqi_info.pm2_5 | default(0) }},
+        pm10: {{ weather_data.aqi_info.pm10 | default(0) }}
+    }
+    {% endif %}
+    {% if weather_data.alerts_info %},
+    alerts: {{ weather_data.alerts_info | tojson }}
+    {% endif %}
+};
+{% else %}
+window.currentWeatherData = null;
+{% endif %}
+
 // Temperature Unit Toggle
 (function() {
     const toggle = document.getElementById('tempUnitToggle');

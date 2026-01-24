@@ -16,7 +16,30 @@ class WeatherApp {
         this.setupEventListeners();
         this.loadRecentCities();
         this.disableAutofillOnSearch();
+        this.storeCurrentWeatherData();
         this.initializeChatAgent();
+    }
+
+    storeCurrentWeatherData() {
+        // Store server-rendered weather data in state manager for chat agent
+        if (window.currentWeatherData) {
+            const data = window.currentWeatherData;
+            const locationKey = data.location.name;
+            
+            // Store the weather data in state manager
+            this.stateManager.setWeatherData(locationKey, data);
+            
+            // Set as the currently selected/viewed location
+            this.stateManager.setSelectedLocation(locationKey);
+            
+            // Also store the full display name
+            const displayName = [data.location.name, data.location.region, data.location.country]
+                .filter(Boolean)
+                .join(', ');
+            
+            // Add to recent locations for context
+            this.stateManager.addToRecentLocations(locationKey, displayName);
+        }
     }
 
     initializeChatAgent() {

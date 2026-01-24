@@ -54,8 +54,9 @@ class ChatAgent {
         chatButton.className = 'chat-agent-button';
         chatButton.appearance = 'accent';
         chatButton.innerHTML = `
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                <path d="M10 2a6 6 0 0 1 6 6v4a6 6 0 0 1-6 6H6a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1a1 1 0 0 1-2 0v-1H6v2h4a4 4 0 0 0 4-4V8a4 4 0 0 0-8 0v.5a1 1 0 0 1-2 0V8a6 6 0 0 1 6-6z"/>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M6.5 10a4.5 4.5 0 1 1 9 0h.5a3.5 3.5 0 1 1 0 7H6a4 4 0 0 1-.5-7.97 4.5 4.5 0 0 1 1-0.03z"/>
+                <path d="M12 14l-2.5 5h2l-.5 2 3-4h-2l.5-3z" fill="white"/>
             </svg>
         `;
         chatButton.title = 'Weather Assistant';
@@ -68,8 +69,9 @@ class ChatAgent {
         chatWindow.innerHTML = `
             <div class="chat-header">
                 <div class="chat-title">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M10 2a6 6 0 0 1 6 6v4a6 6 0 0 1-6 6H6a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v1a1 1 0 0 1-2 0v-1H6v2h4a4 4 0 0 0 4-4V8a4 4 0 0 0-8 0v.5a1 1 0 0 1-2 0V8a6 6 0 0 1 6-6z"/>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M6.5 10a4.5 4.5 0 1 1 9 0h.5a3.5 3.5 0 1 1 0 7H6a4 4 0 0 1-.5-7.97 4.5 4.5 0 0 1 1-0.03z"/>
+                        <path d="M12 14l-2.5 5h2l-.5 2 3-4h-2l.5-3z" fill="#FFD700"/>
                     </svg>
                     <span>Weather Assistant</span>
                 </div>
@@ -86,17 +88,17 @@ class ChatAgent {
                 </div>
             </div>
             <div class="chat-input-area">
-                <fluent-text-field 
+                <input 
+                    type="text"
                     id="chatInput" 
                     class="chat-input" 
                     placeholder="Ask about the weather..."
-                    type="text">
-                </fluent-text-field>
-                <fluent-button id="chatSendButton" appearance="accent" class="chat-send-btn">
+                />
+                <button id="chatSendButton" class="chat-send-btn">
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
                         <path d="M1.724 1.053a.5.5 0 0 0-.714.545l1.403 4.85a.5.5 0 0 0 .397.354l5.69.953c.268.045.268.434 0 .478l-5.69.953a.5.5 0 0 0-.397.354l-1.403 4.85a.5.5 0 0 0 .714.545l13-6.5a.5.5 0 0 0 0-.894l-13-6.5z"/>
                     </svg>
-                </fluent-button>
+                </button>
             </div>
         `;
 
@@ -201,13 +203,31 @@ class ChatAgent {
     }
 
     getWeatherContext() {
-        // Get last 5 recent locations with their weather data
-        const recentLocations = this.stateManager.getRecentLocations().slice(0, 5);
+        // Get the currently displayed weather data first
+        const currentLocation = this.stateManager.getUIState().selectedLocation;
         const context = {
             locations: [],
-            currentLocation: this.stateManager.getUIState().selectedLocation
+            currentLocation: currentLocation,
+            currentWeather: null
         };
 
+        // Get the current location's weather data (most important for context)
+        if (currentLocation) {
+            const currentData = this.stateManager.getWeatherData(currentLocation);
+            if (currentData) {
+                context.currentWeather = {
+                    location: currentData.location,
+                    current: currentData.current,
+                    forecast: currentData.forecast,
+                    uv_info: currentData.uv_info,
+                    aqi_info: currentData.aqi_info,
+                    alerts: currentData.alerts
+                };
+            }
+        }
+
+        // Also get recent locations for additional context
+        const recentLocations = this.stateManager.getRecentLocations().slice(0, 5);
         for (const recent of recentLocations) {
             const weatherData = this.stateManager.getWeatherData(recent.location);
             if (weatherData) {
@@ -291,7 +311,7 @@ class ChatAgent {
                             
                             if (parsed.content) {
                                 fullText += parsed.content;
-                                contentElement.textContent = fullText;
+                                contentElement.innerHTML = this.parseMarkdown(fullText);
                                 this.scrollToBottom();
                             }
                         } catch (e) {
@@ -319,9 +339,15 @@ class ChatAgent {
         const messageDiv = document.createElement('div');
         messageDiv.id = messageId;
         messageDiv.className = `chat-message ${role}-message`;
+        
+        // Render markdown for assistant messages, escape HTML for user messages
+        const renderedContent = role === 'assistant' && content 
+            ? this.parseMarkdown(content) 
+            : this.escapeHtml(content);
+        
         messageDiv.innerHTML = `
             <div class="message-avatar">${role === 'user' ? '👤' : '🤖'}</div>
-            <div class="message-content">${this.escapeHtml(content)}</div>
+            <div class="message-content">${renderedContent}</div>
         `;
 
         this.elements.messages.appendChild(messageDiv);
@@ -373,6 +399,59 @@ class ChatAgent {
         requestAnimationFrame(() => {
             this.elements.messages.scrollTop = this.elements.messages.scrollHeight;
         });
+    }
+
+    parseMarkdown(text) {
+        if (!text) return '';
+        
+        // Escape HTML first to prevent XSS
+        let html = this.escapeHtml(text);
+        
+        // Code blocks (```code```)
+        html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+        
+        // Inline code (`code`)
+        html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+        
+        // Headers (### Header)
+        html = html.replace(/^### (.+)$/gm, '<h4>$1</h4>');
+        html = html.replace(/^## (.+)$/gm, '<h3>$1</h3>');
+        html = html.replace(/^# (.+)$/gm, '<h2>$1</h2>');
+        
+        // Bold (**text** or __text__)
+        html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        html = html.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+        
+        // Italic (*text* or _text_)
+        html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+        html = html.replace(/_([^_]+)_/g, '<em>$1</em>');
+        
+        // Unordered lists (- item)
+        html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+        html = html.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
+        
+        // Ordered lists (1. item)
+        html = html.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+        
+        // Line breaks (double newline = paragraph)
+        html = html.replace(/\n\n/g, '</p><p>');
+        html = html.replace(/\n/g, '<br>');
+        
+        // Wrap in paragraph if not already wrapped
+        if (!html.startsWith('<')) {
+            html = '<p>' + html + '</p>';
+        }
+        
+        // Clean up empty paragraphs
+        html = html.replace(/<p><\/p>/g, '');
+        html = html.replace(/<p>(<h[234]>)/g, '$1');
+        html = html.replace(/(<\/h[234]>)<\/p>/g, '$1');
+        html = html.replace(/<p>(<ul>)/g, '$1');
+        html = html.replace(/(<\/ul>)<\/p>/g, '$1');
+        html = html.replace(/<p>(<pre>)/g, '$1');
+        html = html.replace(/(<\/pre>)<\/p>/g, '$1');
+        
+        return html;
     }
 
     escapeHtml(text) {

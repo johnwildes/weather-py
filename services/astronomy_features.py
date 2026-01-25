@@ -90,7 +90,7 @@ def process_astronomy_day(day_data: Dict[str, Any], is_current_day: bool = False
     moonrise = astro.get('moonrise', '').strip()
     moonset = astro.get('moonset', '').strip()
     moon_phase = astro.get('moon_phase', '').strip()
-    moon_illumination = astro.get('moon_illumination', '').strip()
+    moon_illumination = str(astro.get('moon_illumination', '')).strip()
     
     # Calculate daylight duration
     daylight_duration = calculate_daylight_duration(sunrise, sunset)

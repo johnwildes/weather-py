@@ -815,6 +815,7 @@ fluent-message-bar {
     background: var(--app-surface);
     border-radius: var(--border-radius);
     box-shadow: var(--card-shadow);
+    padding: var(--spacing-lg);
 }
 
 .astronomy-header {

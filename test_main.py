@@ -292,3 +292,55 @@ def test_service_worker_registration_script(client):
     assert 'SW registered' in html_content or 'registration.scope' in html_content
     assert 'SW registration failed' in html_content or 'error' in html_content
 
+
+# Debug Panel Tests
+def test_debug_endpoint_disabled_by_default(client):
+    """Test that debug endpoint returns 403 when WEATHER_DEBUG_MODE is not set"""
+    os.environ.pop('WEATHER_DEBUG_MODE', None)
+    response = client.get('/api/debug/info')
+    assert response.status_code == 403
+    assert response.json == {'error': 'Debug mode not enabled'}
+
+
+def test_debug_endpoint_enabled(client):
+    """Test that debug endpoint returns info when WEATHER_DEBUG_MODE=true"""
+    os.environ['WEATHER_DEBUG_MODE'] = 'true'
+    response = client.get('/api/debug/info')
+    assert response.status_code == 200
+    
+    data = response.json
+    assert 'environment' in data
+    assert 'server' in data
+    assert 'timestamp' in data
+    assert 'flask_debug' in data['environment']
+    assert 'python_version' in data['server']
+    assert 'flask_version' in data['server']
+    
+    # Cleanup
+    os.environ.pop('WEATHER_DEBUG_MODE', None)
+
+
+def test_debug_panel_not_included_when_disabled(client):
+    """Test that debug panel assets are not included when debug mode is off"""
+    os.environ.pop('WEATHER_DEBUG_MODE', None)
+    response = client.get('/')
+    assert response.status_code == 200
+    
+    html_content = response.data.decode('utf-8')
+    assert 'debug-panel.css' not in html_content
+    assert 'debug-panel.js' not in html_content
+
+
+def test_debug_panel_included_when_enabled(client):
+    """Test that debug panel assets are included when debug mode is on"""
+    os.environ['WEATHER_DEBUG_MODE'] = 'true'
+    response = client.get('/')
+    assert response.status_code == 200
+    
+    html_content = response.data.decode('utf-8')
+    assert 'debug-panel.css' in html_content
+    assert 'debug-panel.js' in html_content
+    
+    # Cleanup
+    os.environ.pop('WEATHER_DEBUG_MODE', None)
+

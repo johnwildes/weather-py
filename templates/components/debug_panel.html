@@ -1,0 +1,8 @@
+{# Debug Panel Component - Only rendered when WEATHER_DEBUG_MODE=true #}
+{% if debug_mode %}
+<!-- Debug Panel CSS -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/debug-panel.css') }}">
+
+<!-- Debug Panel JavaScript -->
+<script src="{{ url_for('static', filename='js/debug-panel.js') }}" defer></script>
+{% endif %}

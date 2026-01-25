@@ -27,6 +27,14 @@ def reset_weather_service():
     home._weather_service = None
 
 
+def _get_moon_phase_for_day(day_number):
+    """Helper to get moon phase based on day number in forecast."""
+    phases = ['Waxing Crescent', 'First Quarter', 'Waxing Gibbous', 
+              'Full Moon', 'Waning Gibbous', 'Last Quarter', 
+              'Waning Crescent', 'New Moon']
+    return phases[day_number % len(phases)]
+
+
 def create_mock_weather_response_with_astronomy():
     """Create a complete mock weather response including astronomy data."""
     today = datetime.now().date()
@@ -99,7 +107,7 @@ def create_mock_weather_response_with_astronomy():
                         'sunset': '05:46 PM',
                         'moonrise': '09:00 PM',
                         'moonset': '10:00 AM',
-                        'moon_phase': 'First Quarter' if i < 5 else 'Waxing Gibbous',
+                        'moon_phase': _get_moon_phase_for_day(i),
                         'moon_illumination': str(15 + i * 10)
                     }
                 }

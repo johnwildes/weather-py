@@ -85,12 +85,12 @@ def process_astronomy_day(day_data: Dict[str, Any], is_current_day: bool = False
     """
     astro = day_data.get('astro', {})
     
-    sunrise = astro.get('sunrise', '')
-    sunset = astro.get('sunset', '')
-    moonrise = astro.get('moonrise', '')
-    moonset = astro.get('moonset', '')
-    moon_phase = astro.get('moon_phase', '')
-    moon_illumination = astro.get('moon_illumination', '')
+    sunrise = astro.get('sunrise', '').strip()
+    sunset = astro.get('sunset', '').strip()
+    moonrise = astro.get('moonrise', '').strip()
+    moonset = astro.get('moonset', '').strip()
+    moon_phase = astro.get('moon_phase', '').strip()
+    moon_illumination = astro.get('moon_illumination', '').strip()
     
     # Calculate daylight duration
     daylight_duration = calculate_daylight_duration(sunrise, sunset)
@@ -105,8 +105,8 @@ def process_astronomy_day(day_data: Dict[str, Any], is_current_day: bool = False
         'sunset': sunset,
         'moonrise': moonrise,
         'moonset': moonset,
-        'has_moonrise': bool(moonrise and moonrise.lower() != 'no moonrise'),
-        'has_moonset': bool(moonset and moonset.lower() != 'no moonset'),
+        'has_moonrise': bool(moonrise and not moonrise.lower().startswith('no ')),
+        'has_moonset': bool(moonset and not moonset.lower().startswith('no ')),
         'moon_phase': moon_phase,
         'moon_phase_emoji': moon_emoji,
         'moon_illumination': moon_illumination,

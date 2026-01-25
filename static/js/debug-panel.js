@@ -91,7 +91,7 @@ class DebugPanel {
         return `
             <div class="debug-panel-header">
                 <h3>🔧 Debug Panel</h3>
-                <button class="debug-close-btn">×</button>
+                <button class="debug-close-btn" type="button" aria-label="Close debug panel">×</button>
             </div>
             <div class="debug-tabs">
                 <button class="debug-tab" data-tab="weather">Weather</button>

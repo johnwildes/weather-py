@@ -146,7 +146,7 @@ The debug panel provides:
 - **Requests** - API call history with timing and status
 - **Environment** - Server info and safe environment variables
 
-> **Note**: The debug panel is hidden on mobile devices (screens < 768px).
+> **Note**: The debug panel is hidden on mobile devices (screens ≤ 768px).
 
 ## Deployment
 

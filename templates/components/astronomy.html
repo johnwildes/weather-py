@@ -1,4 +1,6 @@
 <!-- Astronomy Component: Sunrise, Sunset, Moonrise, Moonset, Moon Phase -->
+{% set astronomy_info = weather_data.astronomy_info %}
+{% set astronomy_forecast = weather_data.astronomy_forecast %}
 {% if astronomy_info %}
 <div class="astronomy-section">
     <fluent-card class="astronomy-card">

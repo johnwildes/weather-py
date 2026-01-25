@@ -151,7 +151,7 @@ def test_home_page_with_astronomy_data(mock_get, client):
     
     # Check for multi-day toggle
     assert 'astronomyMultiDayToggle' in html
-    assert '5-Day View' in html
+    assert 'Extended Outlook' in html
     
     # Check for moon phase emoji (should be in the HTML)
     assert '🌒' in html or 'moon_phase_emoji' in html

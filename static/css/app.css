@@ -802,3 +802,193 @@ fluent-message-bar {
         padding: var(--spacing-sm);
     }
 }
+
+/* ========================================
+   Astronomy Section Styles
+   ======================================== */
+
+.astronomy-section {
+    margin-bottom: var(--spacing-lg);
+}
+
+.astronomy-card {
+    background: var(--app-surface);
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+}
+
+.astronomy-header {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+    padding-bottom: var(--spacing-md);
+    border-bottom: 1px solid #e1e1e1;
+}
+
+.astronomy-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--app-text-primary);
+    flex: 1;
+}
+
+.toggle-label {
+    font-size: 0.9rem;
+    color: var(--app-text-secondary);
+}
+
+/* Current Day View */
+.astronomy-current-view {
+    width: 100%;
+}
+
+.astronomy-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: var(--spacing-lg);
+}
+
+.astronomy-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    background: #fafafa;
+    border-radius: var(--border-radius);
+    transition: background 0.2s ease;
+}
+
+.astronomy-item:hover {
+    background: #f0f0f0;
+}
+
+.astronomy-icon {
+    font-size: 2rem;
+    line-height: 1;
+}
+
+.astronomy-details {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-xs);
+}
+
+.astronomy-label {
+    font-size: 0.85rem;
+    color: var(--app-text-secondary);
+    font-weight: 500;
+}
+
+.astronomy-value {
+    font-size: 1.1rem;
+    color: var(--app-text-primary);
+    font-weight: 600;
+}
+
+.astronomy-subvalue {
+    font-size: 0.75rem;
+    color: var(--app-text-secondary);
+}
+
+/* Multi-Day View */
+.astronomy-multi-day-view {
+    width: 100%;
+}
+
+.astronomy-forecast-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.astronomy-forecast-day {
+    padding: var(--spacing-md);
+    background: #fafafa;
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--app-primary-color);
+}
+
+.forecast-day-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--spacing-md);
+    padding-bottom: var(--spacing-sm);
+    border-bottom: 1px solid #e1e1e1;
+}
+
+.forecast-day-name {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--app-text-primary);
+}
+
+.forecast-day-date {
+    font-size: 0.85rem;
+    color: var(--app-text-secondary);
+}
+
+.astronomy-forecast-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: var(--spacing-sm);
+}
+
+.astronomy-mini-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm);
+    background: white;
+    border-radius: 4px;
+}
+
+.astronomy-mini-item.moon-phase-item {
+    grid-column: span 2;
+}
+
+.mini-icon {
+    font-size: 1.2rem;
+    line-height: 1;
+}
+
+.mini-value {
+    font-size: 0.85rem;
+    color: var(--app-text-primary);
+    font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .astronomy-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: var(--spacing-md);
+    }
+    
+    .astronomy-forecast-grid {
+        grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .astronomy-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .astronomy-header {
+        flex-wrap: wrap;
+    }
+    
+    .astronomy-title {
+        font-size: 1.3rem;
+    }
+    
+    .astronomy-forecast-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .astronomy-mini-item.moon-phase-item {
+        grid-column: span 2;
+    }
+}

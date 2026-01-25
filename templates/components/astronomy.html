@@ -1,0 +1,145 @@
+<!-- Astronomy Component: Sunrise, Sunset, Moonrise, Moonset, Moon Phase -->
+{% if astronomy_info %}
+<div class="astronomy-section">
+    <fluent-card class="astronomy-card">
+        <div class="astronomy-header">
+            <h3 class="astronomy-title">☀️ Sun & Moon</h3>
+            {% if astronomy_forecast %}
+            <fluent-switch id="astronomyMultiDayToggle" aria-label="Toggle multi-day astronomy view"></fluent-switch>
+            <span class="toggle-label">5-Day View</span>
+            {% endif %}
+        </div>
+
+        <!-- Current Day View (Default) -->
+        <div id="astronomyCurrentView" class="astronomy-current-view">
+            <div class="astronomy-grid">
+                <div class="astronomy-item">
+                    <div class="astronomy-icon">🌅</div>
+                    <div class="astronomy-details">
+                        <span class="astronomy-label">Sunrise</span>
+                        <span class="astronomy-value">{{ astronomy_info.sunrise }}</span>
+                    </div>
+                </div>
+
+                <div class="astronomy-item">
+                    <div class="astronomy-icon">🌇</div>
+                    <div class="astronomy-details">
+                        <span class="astronomy-label">Sunset</span>
+                        <span class="astronomy-value">{{ astronomy_info.sunset }}</span>
+                    </div>
+                </div>
+
+                {% if astronomy_info.daylight_duration %}
+                <div class="astronomy-item">
+                    <div class="astronomy-icon">☀️</div>
+                    <div class="astronomy-details">
+                        <span class="astronomy-label">Daylight</span>
+                        <span class="astronomy-value">{{ astronomy_info.daylight_duration }}</span>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if astronomy_info.has_moonrise %}
+                <div class="astronomy-item">
+                    <div class="astronomy-icon">🌄</div>
+                    <div class="astronomy-details">
+                        <span class="astronomy-label">Moonrise</span>
+                        <span class="astronomy-value">{{ astronomy_info.moonrise }}</span>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if astronomy_info.has_moonset %}
+                <div class="astronomy-item">
+                    <div class="astronomy-icon">🌆</div>
+                    <div class="astronomy-details">
+                        <span class="astronomy-label">Moonset</span>
+                        <span class="astronomy-value">{{ astronomy_info.moonset }}</span>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="astronomy-item">
+                    <div class="astronomy-icon">{{ astronomy_info.moon_phase_emoji }}</div>
+                    <div class="astronomy-details">
+                        <span class="astronomy-label">Moon Phase</span>
+                        <span class="astronomy-value">{{ astronomy_info.moon_phase }}</span>
+                        {% if astronomy_info.moon_illumination %}
+                        <span class="astronomy-subvalue">{{ astronomy_info.moon_illumination }}% illuminated</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Multi-Day View (Hidden by default) -->
+        {% if astronomy_forecast %}
+        <div id="astronomyMultiDayView" class="astronomy-multi-day-view" style="display: none;">
+            <div class="astronomy-forecast-list">
+                {% for day in astronomy_forecast %}
+                <div class="astronomy-forecast-day">
+                    <div class="forecast-day-header">
+                        <span class="forecast-day-name">{{ day.date | format_date }}</span>
+                        <span class="forecast-day-date">{{ day.date }}</span>
+                    </div>
+                    <div class="astronomy-forecast-grid">
+                        <div class="astronomy-mini-item">
+                            <span class="mini-icon">🌅</span>
+                            <span class="mini-value">{{ day.sunrise }}</span>
+                        </div>
+                        <div class="astronomy-mini-item">
+                            <span class="mini-icon">🌇</span>
+                            <span class="mini-value">{{ day.sunset }}</span>
+                        </div>
+                        {% if day.daylight_duration %}
+                        <div class="astronomy-mini-item">
+                            <span class="mini-icon">☀️</span>
+                            <span class="mini-value">{{ day.daylight_duration }}</span>
+                        </div>
+                        {% endif %}
+                        {% if day.has_moonrise %}
+                        <div class="astronomy-mini-item">
+                            <span class="mini-icon">🌄</span>
+                            <span class="mini-value">{{ day.moonrise }}</span>
+                        </div>
+                        {% endif %}
+                        {% if day.has_moonset %}
+                        <div class="astronomy-mini-item">
+                            <span class="mini-icon">🌆</span>
+                            <span class="mini-value">{{ day.moonset }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="astronomy-mini-item moon-phase-item">
+                            <span class="mini-icon">{{ day.moon_phase_emoji }}</span>
+                            <span class="mini-value">{{ day.moon_phase }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </fluent-card>
+</div>
+
+<script>
+// Toggle between current day and multi-day astronomy view
+(function() {
+    const toggle = document.getElementById('astronomyMultiDayToggle');
+    if (!toggle) return;
+
+    const currentView = document.getElementById('astronomyCurrentView');
+    const multiDayView = document.getElementById('astronomyMultiDayView');
+
+    toggle.addEventListener('change', function() {
+        if (toggle.checked) {
+            currentView.style.display = 'none';
+            multiDayView.style.display = 'block';
+        } else {
+            currentView.style.display = 'block';
+            multiDayView.style.display = 'none';
+        }
+    });
+})();
+</script>
+{% endif %}

@@ -69,6 +69,38 @@ app.add_url_rule('/api/search-locations', 'search_locations', search_locations, 
 app.add_url_rule('/api/detailed-forecast', 'detailed_forecast', get_detailed_forecast, methods=['GET'])
 app.add_url_rule('/api/hourly-forecast', 'hourly_forecast', get_hourly_forecast, methods=['GET'])
 
+# Context processor to inject debug_mode into all templates
+@app.context_processor
+def inject_debug_mode():
+    return {'debug_mode': os.getenv('WEATHER_DEBUG_MODE', 'false').lower() == 'true'}
+
+
+# Debug API endpoint for environment and server info
+@app.route('/api/debug/info')
+def debug_info():
+    """Returns debug-safe environment info (no secrets)"""
+    import sys
+    from importlib.metadata import version
+    
+    # Only allow if debug mode is enabled
+    if os.getenv('WEATHER_DEBUG_MODE', 'false').lower() != 'true':
+        return {'error': 'Debug mode not enabled'}, 403
+    
+    return {
+        'environment': {
+            'flask_debug': os.getenv('FLASK_DEBUG', 'false'),
+            'port': os.getenv('PORT', '5000'),
+            'default_zip_code': os.getenv('DEFAULT_ZIP_CODE', 'not set'),
+            'weather_debug_mode': os.getenv('WEATHER_DEBUG_MODE', 'false'),
+        },
+        'server': {
+            'python_version': sys.version,
+            'flask_version': version('flask'),
+        },
+        'timestamp': datetime.now().isoformat()
+    }
+
+
 if __name__ == '__main__':
     # Get the port from the environment variable or default to 5000
     port = int(os.getenv('PORT', 5000))

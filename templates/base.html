@@ -24,6 +24,9 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/chat-agent.css') }}">
     
+    <!-- Debug Panel (conditional) -->
+    {% include 'components/debug_panel.html' %}
+    
     {% block head %}{% endblock %}
 </head>
 <body>

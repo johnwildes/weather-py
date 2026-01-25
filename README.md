@@ -62,6 +62,7 @@ This project is a modern Flask-based web application that provides weather forec
    WEATHER_API_KEY=your_weather_api_key
    DEFAULT_ZIP_CODE=your_default_zip_code
    FLASK_DEBUG=true
+   WEATHER_DEBUG_MODE=true  # Optional: Enable debug panel
    ```
 
 ## Usage
@@ -131,6 +132,21 @@ Run the test suite using `pytest`:
 ```bash
 pytest
 ```
+
+## Debug Panel
+
+When `WEATHER_DEBUG_MODE=true` is set in your `.env` file, a debug panel becomes available. The panel is hidden by default and can be opened by:
+- Clicking the "🔧 DEBUG" tab on the left edge of the screen
+- Pressing `Ctrl+Shift+D`
+
+The debug panel provides:
+- **Weather JSON** - Raw API response for the current city with syntax highlighting
+- **Cache** - View cached API requests with TTL countdown
+- **State** - Live StateManager state and event log
+- **Requests** - API call history with timing and status
+- **Environment** - Server info and safe environment variables
+
+> **Note**: The debug panel is hidden on mobile devices (screens < 768px).
 
 ## Deployment
 

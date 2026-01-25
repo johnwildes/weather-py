@@ -63,6 +63,11 @@
         </fluent-card>
     </div>
 
+    <!-- Astronomy Section -->
+    {% if weather_data.astronomy_info %}
+    {% include 'components/astronomy.html' with context %}
+    {% endif %}
+
     <!-- Safety Metrics Section (moved after forecast) -->
     <div class="safety-metrics-section">
         {% if weather_data.uv_info %}

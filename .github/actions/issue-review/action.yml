@@ -1,0 +1,38 @@
+name: 'Issue Review Agent'
+description: 'Automatically reviews and assesses GitHub issues for severity using AI'
+author: 'weather-py'
+
+inputs:
+  github-token:
+    description: 'GitHub token for API access'
+    required: true
+  issue-number:
+    description: 'The issue number to review'
+    required: true
+  issue-title:
+    description: 'The issue title'
+    required: true
+  issue-body:
+    description: 'The issue body content'
+    required: false
+    default: ''
+  issue-author:
+    description: 'The issue author username'
+    required: true
+  repository:
+    description: 'The repository in owner/repo format'
+    required: true
+
+outputs:
+  impact-score:
+    description: 'The assessed impact score (1-5)'
+  summary:
+    description: 'Brief summary of the assessment'
+
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+
+branding:
+  icon: 'check-circle'
+  color: 'blue'

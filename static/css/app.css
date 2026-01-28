@@ -24,6 +24,88 @@
     --color-maroon: #5c0019;
 }
 
+/* Dark Mode Color Palette */
+[data-theme="dark"] {
+    --app-primary-color: #4da6ff;
+    --app-secondary-color: #3a8fd9;
+    --app-background: #1a1a1a;
+    --app-surface: #2d2d2d;
+    --app-text-primary: #e5e5e5;
+    --app-text-secondary: #b3b3b3;
+    --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    
+    /* Adjusted safety colors for dark mode */
+    --color-green: #3fb950;
+    --color-yellow: #d4a72c;
+    --color-orange: #e8704b;
+    --color-red: #f85149;
+    --color-purple: #8256d0;
+    --color-maroon: #d4586b;
+}
+
+/* Dark Mode Specific Adjustments */
+[data-theme="dark"] .autocomplete-dropdown {
+    background: var(--app-surface);
+    border: 1px solid #404040;
+}
+
+[data-theme="dark"] .autocomplete-item {
+    border-bottom: 1px solid #404040;
+}
+
+[data-theme="dark"] .autocomplete-item:hover {
+    background-color: #3a3a3a;
+}
+
+[data-theme="dark"] .astronomy-item {
+    background: #242424;
+}
+
+[data-theme="dark"] .astronomy-item:hover {
+    background: #2f2f2f;
+}
+
+[data-theme="dark"] .astronomy-forecast-day {
+    background: #242424;
+}
+
+[data-theme="dark"] .astronomy-mini-item {
+    background: #1a1a1a;
+}
+
+[data-theme="dark"] .temp-bar {
+    background: #404040;
+}
+
+[data-theme="dark"] .forecast-day-row {
+    border-bottom: 1px solid #404040;
+}
+
+[data-theme="dark"] .current-weather-details {
+    border-top: 1px solid #404040;
+}
+
+[data-theme="dark"] .temp-unit-toggle {
+    background: #242424;
+}
+
+[data-theme="dark"] .alert-card {
+    background: #3a2f1a;
+}
+
+[data-theme="dark"] .alert-instruction {
+    background: #4a3820;
+}
+
+[data-theme="dark"] .astronomy-header,
+[data-theme="dark"] .forecast-day-header {
+    border-bottom: 1px solid #404040;
+}
+
+[data-theme="dark"] .aqi-details {
+    border-top: 1px solid #404040;
+}
+
 /* Base Styles */
 * {
     box-sizing: border-box;
@@ -83,12 +165,61 @@ fluent-card.search-card::part(control) {
     gap: var(--spacing-lg);
 }
 
+.header-row {
+    display: grid;
+    grid-template-columns: 48px 1fr 48px;
+    align-items: center;
+    gap: var(--spacing-md);
+}
+
 .app-title {
     font-size: 2rem;
     font-weight: 600;
     color: var(--app-primary-color);
     text-align: center;
     margin: 0;
+    grid-column: 2;
+}
+
+.theme-toggle-container {
+    grid-column: 3;
+    justify-self: end;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    background: var(--app-background);
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.theme-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+}
+
+.theme-icon-light {
+    opacity: 1;
+}
+
+[data-theme="dark"] .theme-icon-light {
+    opacity: 0.5;
+}
+
+[data-theme="dark"] .theme-icon-dark {
+    opacity: 1;
+}
+
+#themeToggle {
+    --switch-height: 20px;
+    margin: 0;
+}
+
+#themeToggle::part(switch) {
+    height: 20px;
+    width: 36px;
 }
 
 .search-input-row {
@@ -196,12 +327,22 @@ fluent-card.search-card::part(control) {
 .recent-city-badge {
     cursor: pointer;
     transition: all 0.15s ease;
+    background-color: var(--app-primary-color) !important;
+    color: white !important;
+    border: none !important;
+    padding: 4px 12px;
+    border-radius: 16px;
+}
+
+.recent-city-badge .badge-text {
+    color: white;
 }
 
 .recent-city-badge:hover {
-    background-color: var(--app-primary-color);
-    color: white;
+    background-color: var(--app-secondary-color) !important;
+    color: white !important;
 }
+
 
 /* Forecast Content */
 .forecast-content {
@@ -301,6 +442,7 @@ fluent-card.search-card::part(control) {
     font-size: 1.25rem;
     font-weight: 500;
     margin: 0 0 var(--spacing-md);
+    color: var(--app-text-primary)
 }
 
 .weather-stats {

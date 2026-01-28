@@ -2,7 +2,17 @@
 <div class="search-bar-container">
     <fluent-card class="search-card">
         <div class="search-content">
-            <h1 class="app-title">Weather Forecast</h1>
+            <div class="header-row">
+                <h1 class="app-title">Weather Forecast</h1>
+                <div class="theme-toggle-container" title="Toggle dark mode">
+                    <span class="theme-icon theme-icon-light">☀️</span>
+                    <fluent-switch 
+                        id="themeToggle" 
+                        aria-label="Toggle dark mode">
+                    </fluent-switch>
+                    <span class="theme-icon theme-icon-dark">🌙</span>
+                </div>
+            </div>
             <div class="search-input-row">
                 <div class="search-input-wrapper" id="searchInputWrapper">
                     <fluent-text-field 

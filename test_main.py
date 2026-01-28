@@ -344,3 +344,42 @@ def test_debug_panel_included_when_enabled(client):
     # Cleanup
     os.environ.pop('WEATHER_DEBUG_MODE', None)
 
+
+def test_dark_mode_toggle_button_exists(client):
+    """Test that the dark mode toggle switch exists in the page."""
+    response = client.get('/')
+    assert response.status_code == 200
+    
+    html_content = response.data.decode('utf-8')
+    # Verify toggle switch exists with sun/moon icons
+    assert 'id="themeToggle"' in html_content
+    assert 'theme-toggle-container' in html_content
+    assert 'theme-icon-light' in html_content
+    assert 'theme-icon-dark' in html_content
+    assert 'Toggle dark mode' in html_content
+
+
+def test_dark_mode_css_variables_exist(client):
+    """Test that dark mode CSS variables are defined."""
+    response = client.get('/static/css/app.css')
+    assert response.status_code == 200
+    
+    css_content = response.data.decode('utf-8')
+    # Verify dark mode CSS is present
+    assert '[data-theme="dark"]' in css_content
+    assert '--app-background' in css_content
+    assert '--app-surface' in css_content
+    assert '--app-text-primary' in css_content
+
+
+def test_dark_mode_script_exists(client):
+    """Test that dark mode JavaScript is included in the page."""
+    response = client.get('/')
+    assert response.status_code == 200
+    
+    html_content = response.data.decode('utf-8')
+    # Verify dark mode script exists
+    assert 'weather_theme' in html_content
+    assert 'applyTheme' in html_content
+    assert 'data-theme' in html_content
+

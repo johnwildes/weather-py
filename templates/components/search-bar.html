@@ -4,13 +4,14 @@
         <div class="search-content">
             <div class="header-row">
                 <h1 class="app-title">Weather Forecast</h1>
-                <fluent-button 
-                    id="themeToggle" 
-                    appearance="stealth"
-                    title="Toggle dark mode"
-                    aria-label="Switch to dark mode">
-                    <span id="themeIcon">🌙</span>
-                </fluent-button>
+                <div class="theme-toggle-container" title="Toggle dark mode">
+                    <span class="theme-icon theme-icon-light">☀️</span>
+                    <fluent-switch 
+                        id="themeToggle" 
+                        aria-label="Toggle dark mode">
+                    </fluent-switch>
+                    <span class="theme-icon theme-icon-dark">🌙</span>
+                </div>
             </div>
             <div class="search-input-row">
                 <div class="search-input-wrapper" id="searchInputWrapper">

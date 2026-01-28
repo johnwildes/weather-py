@@ -346,14 +346,16 @@ def test_debug_panel_included_when_enabled(client):
 
 
 def test_dark_mode_toggle_button_exists(client):
-    """Test that the dark mode toggle button exists in the page."""
+    """Test that the dark mode toggle switch exists in the page."""
     response = client.get('/')
     assert response.status_code == 200
     
     html_content = response.data.decode('utf-8')
-    # Verify toggle button exists
+    # Verify toggle switch exists with sun/moon icons
     assert 'id="themeToggle"' in html_content
-    assert 'id="themeIcon"' in html_content
+    assert 'theme-toggle-container' in html_content
+    assert 'theme-icon-light' in html_content
+    assert 'theme-icon-dark' in html_content
     assert 'Toggle dark mode' in html_content
 
 

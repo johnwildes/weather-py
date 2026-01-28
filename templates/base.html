@@ -79,20 +79,20 @@
         (function() {
             const THEME_STORAGE_KEY = 'weather_theme';
             const themeToggle = document.getElementById('themeToggle');
-            const themeIcon = document.getElementById('themeIcon');
+            const themeContainer = document.querySelector('.theme-toggle-container');
             const themeColorMeta = document.querySelector('meta[name="theme-color"]');
             
             // Function to apply theme
-            function applyTheme(theme) {
+            function applyTheme(theme, updateSwitch = true) {
                 if (theme === 'dark') {
                     document.documentElement.setAttribute('data-theme', 'dark');
-                    if (themeIcon) themeIcon.textContent = '☀️';
-                    if (themeToggle) themeToggle.setAttribute('aria-label', 'Switch to light mode');
+                    if (themeToggle && updateSwitch) themeToggle.checked = true;
+                    if (themeContainer) themeContainer.setAttribute('title', 'Switch to light mode');
                     if (themeColorMeta) themeColorMeta.setAttribute('content', '#1a1a1a');
                 } else {
                     document.documentElement.removeAttribute('data-theme');
-                    if (themeIcon) themeIcon.textContent = '🌙';
-                    if (themeToggle) themeToggle.setAttribute('aria-label', 'Switch to dark mode');
+                    if (themeToggle && updateSwitch) themeToggle.checked = false;
+                    if (themeContainer) themeContainer.setAttribute('title', 'Switch to dark mode');
                     if (themeColorMeta) themeColorMeta.setAttribute('content', '#0078d4');
                 }
             }
@@ -101,13 +101,11 @@
             const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) || 'light';
             applyTheme(savedTheme);
             
-            // Toggle theme on button click
+            // Toggle theme on switch change
             if (themeToggle) {
-                themeToggle.addEventListener('click', function() {
-                    const currentTheme = document.documentElement.getAttribute('data-theme');
-                    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-                    
-                    applyTheme(newTheme);
+                themeToggle.addEventListener('change', function() {
+                    const newTheme = themeToggle.checked ? 'dark' : 'light';
+                    applyTheme(newTheme, false);
                     localStorage.setItem(THEME_STORAGE_KEY, newTheme);
                 });
             }

@@ -18,8 +18,8 @@ def client():
 @pytest.fixture(autouse=True)
 def reset_weather_service():
     """Reset the weather service singleton before each test."""
-    import forecast
-    import home
+    import routes.forecast as forecast
+    import routes.home as home
     forecast._weather_service = None
     home._weather_service = None
     yield

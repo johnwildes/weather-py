@@ -17,9 +17,9 @@ from flask import Flask
 from dotenv import load_dotenv
 
 # Import blueprints
-from forecast import forecast_bp  # Import forecast blueprint
-from home import home_bp  # Import home blueprint
-from chat import chat_bp  # Import chat blueprint
+from routes.forecast import forecast_bp
+from routes.home import home_bp
+from routes.chat import chat_bp
 from datetime import datetime, timedelta
 
 # Load environment variables from a .env file if it exists
@@ -61,7 +61,7 @@ app.register_blueprint(home_bp, url_prefix='/')
 app.register_blueprint(chat_bp, url_prefix='/api/chat')
 
 # Register API routes directly to the main app for cleaner URLs
-from forecast import get_bulk_weather, validate_location, search_locations, get_detailed_forecast, get_hourly_forecast
+from routes.forecast import get_bulk_weather, validate_location, search_locations, get_detailed_forecast, get_hourly_forecast
 
 app.add_url_rule('/api/weather/bulk', 'bulk_weather', get_bulk_weather, methods=['POST'])
 app.add_url_rule('/api/validate-location', 'validate_location', validate_location, methods=['GET'])

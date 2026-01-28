@@ -14,8 +14,8 @@ FLASK_DEBUG=true python main.py       # With hot reload
 
 # Testing
 pytest                                # All tests
-pytest test_main.py -v                # Single file, verbose
-pytest test_main.py::test_name -v     # Single test
+pytest tests/test_main.py -v          # Single file, verbose
+pytest tests/test_main.py::test_name -v  # Single test
 
 # Docker
 docker build -t weather-py .
@@ -33,13 +33,13 @@ Required: `WEATHER_API_KEY` (from weatherapi.com). Optional: `DEFAULT_ZIP_CODE`,
 ### Backend (Python/Flask)
 
 - **Entry point**: `main.py` — Flask app init, blueprint registration, API route mounting, template filters
-- **Blueprints**: `forecast.py` (weather data routes), `home.py` (home page), `chat.py` (AI assistant via Azure OpenAI)
+- **Blueprints** (`routes/`): `forecast.py` (weather data routes), `home.py` (home page), `chat.py` (AI assistant via Azure OpenAI)
 - **Service layer** (`services/`): Provider pattern with abstract base class
   - `weather_service.py` — `WeatherService` ABC defining the interface, plus dataclasses (`LocationInfo`, `SearchResult`) and custom exceptions (`WeatherServiceError`, `APIKeyMissingError`, `LocationNotFoundError`, `APIRequestError`)
   - `weatherapi_provider.py` — Concrete implementation using weatherapi.com with TTL caching (`cachetools.TTLCache`: weather 5min, location 1hr, search 10min)
   - `astronomy_features.py` — Sun/moon data enrichment (moon phase emojis, daylight duration)
   - `safety_features.py` — UV Index (WHO), Air Quality (EPA), Weather Alerts (NOAA/NWS)
-- **Singleton pattern**: Weather service and Azure client are lazily initialized module-level singletons. Tests must reset these between runs (see `reset_weather_service` autouse fixture in `test_main.py`)
+- **Singleton pattern**: Weather service and Azure client are lazily initialized module-level singletons. Tests must reset these between runs (see `reset_weather_service` autouse fixture in `tests/test_main.py`)
 - **Response format detection**: Routes check User-Agent to return HTML for browsers, JSON for CLI tools
 
 ### Frontend (JavaScript/Jinja2)
@@ -69,7 +69,7 @@ Required: `WEATHER_API_KEY` (from weatherapi.com). Optional: `DEFAULT_ZIP_CODE`,
 ## Testing Conventions
 
 - Framework: pytest with Flask test client
-- Test files are in the project root (e.g., `test_main.py`, `test_chat.py`, `test_safety_features.py`)
+- Test files are in the `tests/` directory (e.g., `tests/test_main.py`, `tests/test_chat.py`, `tests/test_safety_features.py`)
 - Mock external API calls with `@patch('services.weatherapi_provider.requests.get')`
 - Singleton must be reset between tests via autouse fixture
 - Tests cover both browser (HTML) and CLI (JSON) response paths

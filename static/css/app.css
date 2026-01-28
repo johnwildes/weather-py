@@ -166,8 +166,8 @@ fluent-card.search-card::part(control) {
 }
 
 .header-row {
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 48px 1fr 48px;
     align-items: center;
     gap: var(--spacing-md);
 }
@@ -178,11 +178,12 @@ fluent-card.search-card::part(control) {
     color: var(--app-primary-color);
     text-align: center;
     margin: 0;
-    flex: 1;
+    grid-column: 2;
 }
 
 #themeToggle {
-    flex-shrink: 0;
+    grid-column: 3;
+    justify-self: end;
     font-size: 1.5rem;
 }
 

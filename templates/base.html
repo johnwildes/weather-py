@@ -27,6 +27,17 @@
     <!-- Debug Panel (conditional) -->
     {% include 'components/debug_panel.html' %}
     
+    <!-- Dark Mode Initialization (prevents flash of light mode) -->
+    <script>
+        // Apply saved theme immediately to prevent flash
+        (function() {
+            const savedTheme = localStorage.getItem('weather_theme') || 'light';
+            if (savedTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
+    
     {% block head %}{% endblock %}
 </head>
 <body>
@@ -69,26 +80,26 @@
             const THEME_STORAGE_KEY = 'weather_theme';
             const themeToggle = document.getElementById('themeToggle');
             const themeIcon = document.getElementById('themeIcon');
+            const themeColorMeta = document.querySelector('meta[name="theme-color"]');
             
             // Function to apply theme
             function applyTheme(theme) {
                 if (theme === 'dark') {
                     document.documentElement.setAttribute('data-theme', 'dark');
                     if (themeIcon) themeIcon.textContent = '☀️';
+                    if (themeToggle) themeToggle.setAttribute('aria-label', 'Switch to light mode');
+                    if (themeColorMeta) themeColorMeta.setAttribute('content', '#1a1a1a');
                 } else {
                     document.documentElement.removeAttribute('data-theme');
                     if (themeIcon) themeIcon.textContent = '🌙';
+                    if (themeToggle) themeToggle.setAttribute('aria-label', 'Switch to dark mode');
+                    if (themeColorMeta) themeColorMeta.setAttribute('content', '#0078d4');
                 }
             }
             
             // Load saved theme or default to light
             const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) || 'light';
             applyTheme(savedTheme);
-            
-            // Update state manager if available
-            if (window.stateManager) {
-                window.stateManager.updatePreference('theme', savedTheme);
-            }
             
             // Toggle theme on button click
             if (themeToggle) {
@@ -98,11 +109,6 @@
                     
                     applyTheme(newTheme);
                     localStorage.setItem(THEME_STORAGE_KEY, newTheme);
-                    
-                    // Update state manager if available
-                    if (window.stateManager) {
-                        window.stateManager.updatePreference('theme', newTheme);
-                    }
                 });
             }
         })();

@@ -1,0 +1,15 @@
+# Default maintainer
+* @johnwildes
+
+# Frontend assets
+/static/ @frontend-dev
+/templates/ @frontend-dev
+
+# Backend services
+/services/ @backend-dev
+/routes/ @backend-dev
+
+# Critical config
+/main.py @johnwildes @senior-dev
+/.env.example @johnwildes
+/Dockerfile @devops-team

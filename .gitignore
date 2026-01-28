@@ -20,11 +20,10 @@ venv/
 *.egg
 *.egg-info/
 
-dist/
+
 build/
 
 # Ignore Jupyter Notebook checkpoints
 .ipynb_checkpoints/
 # Ignore Node.js dependencies
 node_modules/
-actions/issue-review/node_modules

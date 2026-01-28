@@ -5,7 +5,7 @@ Tests for chat agent functionality
 import pytest
 import json
 from unittest.mock import patch, MagicMock
-from chat import chat_bp, build_system_prompt
+from routes.chat import chat_bp, build_system_prompt
 
 
 @pytest.fixture

@@ -327,12 +327,22 @@ fluent-card.search-card::part(control) {
 .recent-city-badge {
     cursor: pointer;
     transition: all 0.15s ease;
+    background-color: var(--app-primary-color) !important;
+    color: white !important;
+    border: none !important;
+    padding: 4px 12px;
+    border-radius: 16px;
+}
+
+.recent-city-badge .badge-text {
+    color: white;
 }
 
 .recent-city-badge:hover {
-    background-color: var(--app-primary-color);
-    color: white;
+    background-color: var(--app-secondary-color) !important;
+    color: white !important;
 }
+
 
 /* Forecast Content */
 .forecast-content {
@@ -432,6 +442,7 @@ fluent-card.search-card::part(control) {
     font-size: 1.25rem;
     font-weight: 500;
     margin: 0 0 var(--spacing-md);
+    color: var(--app-text-primary)
 }
 
 .weather-stats {

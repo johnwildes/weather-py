@@ -44,11 +44,11 @@ public static class SafetyFeaturesService
     {
         return uv switch
         {
-            < 3  => new UvInfo { Value = uv, Level = "Low",      Color = "#299501", Recommendation = "No protection required. You can safely stay outside." },
-            < 6  => new UvInfo { Value = uv, Level = "Moderate", Color = "#F7E400", Recommendation = "Seek shade during midday. Wear sun-protective clothing." },
-            < 8  => new UvInfo { Value = uv, Level = "High",     Color = "#F95900", Recommendation = "Reduce time in sun 10am–4pm. Apply SPF 30+ sunscreen." },
-            < 11 => new UvInfo { Value = uv, Level = "Very High",Color = "#D90011", Recommendation = "Take extra precautions. Unprotected skin burns quickly." },
-            _    => new UvInfo { Value = uv, Level = "Extreme",  Color = "#6B49C8", Recommendation = "Avoid sun exposure 10am–4pm. Full sun protection required." }
+            < 3  => new UvInfo { Value = uv, Level = "Low",       Color = "#299501", Recommendation = "No protection required. You can safely stay outside." },
+            < 6  => new UvInfo { Value = uv, Level = "Moderate",  Color = "#F7E400", Recommendation = "Seek shade during midday. Wear sun-protective clothing." },
+            < 8  => new UvInfo { Value = uv, Level = "High",      Color = "#F95900", Recommendation = "Reduce time in sun 10am–4pm. Apply SPF 30+ sunscreen." },
+            < 11 => new UvInfo { Value = uv, Level = "Very High", Color = "#D90011", Recommendation = "Take extra precautions. Unprotected skin burns quickly." },
+            _    => new UvInfo { Value = uv, Level = "Extreme",   Color = "#6B49C8", Recommendation = "Avoid sun exposure 10am–4pm. Full sun protection required." }
         };
     }
 
@@ -59,7 +59,7 @@ public static class SafetyFeaturesService
         {
             1 => new AqiInfo { Level = "Good",                  Color = "#00e400", Guidance = "Air quality is satisfactory, posing little or no risk.",              Pm25 = aq.Pm25, Pm10 = aq.Pm10 },
             2 => new AqiInfo { Level = "Moderate",              Color = "#ffff00", Guidance = "Unusually sensitive individuals should reduce prolonged exertion.",    Pm25 = aq.Pm25, Pm10 = aq.Pm10 },
-            3 => new AqiInfo { Level = "Unhealthy for Sensitive",Color = "#ff7e00",Guidance = "Sensitive groups should limit prolonged outdoor exertion.",            Pm25 = aq.Pm25, Pm10 = aq.Pm10 },
+            3 => new AqiInfo { Level = "Unhealthy for Sensitive", Color = "#ff7e00", Guidance = "Sensitive groups should limit prolonged outdoor exertion.",            Pm25 = aq.Pm25, Pm10 = aq.Pm10 },
             4 => new AqiInfo { Level = "Unhealthy",             Color = "#ff0000", Guidance = "Everyone may begin to experience health effects.",                     Pm25 = aq.Pm25, Pm10 = aq.Pm10 },
             5 => new AqiInfo { Level = "Very Unhealthy",        Color = "#8f3f97", Guidance = "Health warnings. Avoid prolonged outdoor activity.",                  Pm25 = aq.Pm25, Pm10 = aq.Pm10 },
             _ => new AqiInfo { Level = "Hazardous",             Color = "#7e0023", Guidance = "Health emergency. Everyone should avoid all outdoor exertion.",        Pm25 = aq.Pm25, Pm10 = aq.Pm10 }

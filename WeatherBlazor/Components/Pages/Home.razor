@@ -91,9 +91,4 @@
             _loading = false;
         }
     }
-
-    private void OnSearch(string query)
-    {
-        Nav.NavigateTo($"/?location={Uri.EscapeDataString(query)}");
-    }
 }

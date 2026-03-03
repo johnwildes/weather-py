@@ -27,3 +27,10 @@ build/
 .ipynb_checkpoints/
 # Ignore Node.js dependencies
 node_modules/
+
+# .NET build artifacts
+WeatherBlazor/bin/
+WeatherBlazor/obj/
+WeatherBlazor/wwwroot/lib/
+WeatherBlazor.Tests/bin/
+WeatherBlazor.Tests/obj/

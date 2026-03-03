@@ -1,0 +1,99 @@
+@page "/"
+@rendermode InteractiveServer
+
+<PageTitle>Weather Forecast</PageTitle>
+
+<div class="forecast-content" id="forecastContent">
+
+    @if (_loading)
+    {
+        <div class="loading-state">
+            <FluentProgressRing aria-label="Loading weather data" />
+            <p>Loading weather data…</p>
+        </div>
+    }
+    else if (_errorMessage is not null)
+    {
+        <div class="error-state">
+            <FluentCard class="error-card">
+                <div class="error-content">
+                    <div class="error-icon">⚠️</div>
+                    <h3>Error Loading Weather Data</h3>
+                    <p>@_errorMessage</p>
+                </div>
+            </FluentCard>
+        </div>
+    }
+    else if (_weather is not null)
+    {
+        <div class="current-weather-section">
+            <CurrentWeatherCard Location="@_weather.Location"
+                                Current="@_weather.Current"
+                                @bind-UseFahrenheit="_useFahrenheit" />
+        </div>
+
+        @if (_weather.AstronomyInfo is not null)
+        {
+            <AstronomyCard Info="@_weather.AstronomyInfo" />
+        }
+
+        <SafetyMetrics UvInfo="@_weather.UvInfo" AqiInfo="@_weather.AqiInfo" />
+
+        @if (_weather.Forecast.ForecastDay.Count > 0)
+        {
+            <div class="forecast-section">
+                <ForecastList ForecastDays="@_weather.Forecast.ForecastDay"
+                              UseFahrenheit="@_useFahrenheit" />
+            </div>
+        }
+
+        <AlertsSection Alerts="@_weather.AlertsInfo" />
+    }
+    else
+    {
+        <div class="empty-state">
+            <FluentCard class="empty-card">
+                <div class="empty-content">
+                    <div class="empty-icon">🌤️</div>
+                    <h3>Search for a location</h3>
+                    <p>Enter a city name or ZIP code above to see the weather forecast.</p>
+                </div>
+            </FluentCard>
+        </div>
+    }
+</div>
+
+@code {
+    [Inject] private IWeatherService WeatherService { get; set; } = default!;
+    [Inject] private NavigationManager Nav           { get; set; } = default!;
+
+    [SupplyParameterFromQuery(Name = "location")]
+    public string? Location { get; set; }
+
+    private WeatherViewModel? _weather;
+    private string?           _errorMessage;
+    private bool              _loading;
+    private bool              _useFahrenheit;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!string.IsNullOrWhiteSpace(Location))
+        {
+            _loading      = true;
+            _errorMessage = null;
+            _weather      = null;
+
+            _weather = await WeatherService.GetWeatherAsync(Location);
+
+            if (_weather is null)
+                _errorMessage = $"Unable to fetch weather data for '{Location}'. Please try a different location.";
+
+            _loading = false;
+        }
+    }
+
+    private void OnSearch(string query)
+    {
+        Nav.NavigateTo($"/?location={Uri.EscapeDataString(query)}");
+    }
+}

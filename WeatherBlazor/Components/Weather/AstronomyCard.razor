@@ -1,0 +1,56 @@
+@* Astronomy card: sun/moon rise/set times and moon phase *@
+
+<FluentCard class="astronomy-card">
+    <div class="astronomy-header">
+        <span class="astronomy-icon">🌙</span>
+        <h3 class="astronomy-title">Astronomy</h3>
+    </div>
+
+    <div class="astronomy-grid">
+        <div class="astro-section">
+            <h4>☀️ Sun</h4>
+            <div class="astro-row">
+                <span class="astro-label">Sunrise</span>
+                <span class="astro-value">@Info.Sunrise</span>
+            </div>
+            <div class="astro-row">
+                <span class="astro-label">Sunset</span>
+                <span class="astro-value">@Info.Sunset</span>
+            </div>
+            @if (!string.IsNullOrEmpty(Info.DaylightDuration))
+            {
+                <div class="astro-row">
+                    <span class="astro-label">Daylight</span>
+                    <span class="astro-value">@Info.DaylightDuration</span>
+                </div>
+            }
+        </div>
+
+        <div class="astro-section">
+            <h4>@Info.MoonPhaseEmoji Moon</h4>
+            <div class="astro-row">
+                <span class="astro-label">Moonrise</span>
+                <span class="astro-value">@Info.Moonrise</span>
+            </div>
+            <div class="astro-row">
+                <span class="astro-label">Moonset</span>
+                <span class="astro-value">@Info.Moonset</span>
+            </div>
+            <div class="astro-row">
+                <span class="astro-label">Phase</span>
+                <span class="astro-value">@Info.MoonPhase</span>
+            </div>
+            @if (!string.IsNullOrEmpty(Info.MoonIllumination))
+            {
+                <div class="astro-row">
+                    <span class="astro-label">Illumination</span>
+                    <span class="astro-value">@Info.MoonIllumination%</span>
+                </div>
+            }
+        </div>
+    </div>
+</FluentCard>
+
+@code {
+    [Parameter, EditorRequired] public AstronomyInfo Info { get; set; } = default!;
+}

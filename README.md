@@ -1,103 +1,111 @@
 # Weather Forecast Application
 
-This project is a modern Flask-based web application that provides weather forecasts using the WeatherAPI. The application features a contemporary **Microsoft Fluent UI** interface with support for multiple locations, interactive weather cards, and both JSON (for CLI tools) and HTML (for browsers) responses.
+This project provides a modern weather forecast web application using the WeatherAPI.com service. It has been **completely rebuilt using Blazor** (.NET 10) with a **Microsoft Fluent UI** interface.
+
+![Weather App Screenshot](https://github.com/user-attachments/assets/37e297ac-57a1-48b2-b628-880ed1f7c550)
 
 ## ✨ Features
 
 ### Core Weather Functionality
-- Retrieve weather forecasts for multiple locations simultaneously
-- 3-day weather forecast with detailed conditions
-- 7-day historical weather data
-- Current weather conditions with comprehensive details
-- Weather maps and geolocation support
+- 10-day weather forecast with detailed conditions
+- Current weather conditions (temperature, humidity, wind, visibility, pressure)
+- Astronomy data (sunrise/sunset, moon phase & illumination)
+- Weather alerts with collapsible detail cards
+
+### Safety Metrics
+- **UV Index** classification (Low → Extreme) with WHO recommendations
+- **Air Quality Index** (EPA scale) with health guidance and PM2.5/PM10 readings
 
 ### Modern User Interface
-- **Microsoft Fluent UI** components for a contemporary, accessible design
-- **Multi-location Management** - Add, remove, and monitor multiple locations
-- **Interactive Toolbar** - Smart location input with validation and search
-- **Responsive Design** - Optimized for desktop, tablet, and mobile devices
-- **Dark/Light Theme** support with system preference detection
-
-### Advanced Features
-- **Location Search** - Auto-complete suggestions for cities worldwide
-- **Geolocation Support** - "Use Current Location" functionality
-- **Persistent Settings** - Remembers your selected locations and preferences
-- **Temperature Units** - Switch between Celsius and Fahrenheit
-- **View Modes** - Grid view and comparison table for multiple locations
-- **Detailed Forecasts** - Expandable cards with extended weather information
-
-### API Support
-- RESTful API endpoints for programmatic access
-- Bulk weather data retrieval for multiple locations
-- Location validation and search endpoints
-- Both JSON and HTML responses based on client type
+- **Microsoft Fluent UI for Blazor** components
+- **Location autocomplete** search powered by WeatherAPI
+- **Temperature unit toggle** — switch between °C and °F
+- **Dark/Light theme** toggle
+- Responsive layout for desktop and mobile
 
 ## Prerequisites
 
-- Python 3.13 or higher
-- A WeatherAPI key (sign up at [WeatherAPI](https://www.weatherapi.com/) to get one)
-- Docker (optional, for containerized deployment)
+- [.NET 10 SDK](https://dotnet.microsoft.com/download)
+- A WeatherAPI key (sign up at [WeatherAPI.com](https://www.weatherapi.com/))
 
-## Installation
+## Getting Started
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-username/weather-py.git
-   cd weather-py
-   ```
+### 1. Configure your API key
 
-2. Create a virtual environment and activate it:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
+Set your WeatherAPI key via one of these methods:
 
-3. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
+**Option A — `appsettings.json`** (development only; keep out of source control):
+```json
+{
+  "WeatherApiKey": "your_key_here"
+}
+```
 
-4. Create a `.env` file in the project root and add the following:
-   ```
-   WEATHER_API_KEY=your_weather_api_key
-   DEFAULT_ZIP_CODE=your_default_zip_code
-   FLASK_DEBUG=true
-   WEATHER_DEBUG_MODE=true  # Optional: Enable debug panel
-   ```
+**Option B — Environment variable** (recommended for production):
+```bash
+export WEATHER_API_KEY=your_key_here
+```
 
-## Usage
-
-### Quick Start
-
-1. Run the quick start script:
-   ```bash
-   ./start.sh
-   ```
-
-### Manual Setup
-
-1. Start the Flask application:
-   ```bash
-   python main.py
-   ```
-
-2. **Web Interface**: Open your browser and navigate to:
-   - **Home**: `http://localhost:5000/` - Weather map and location info
-   - **Forecast**: `http://localhost:5000/forecast` - Multi-location weather dashboard
-   - **Legacy**: `http://localhost:5000/forecast?zip=12345` - Single location (legacy mode)
-
-3. **Using the Toolbar**:
-   - Enter a ZIP code, city name, or coordinates in the location input
-   - Click "Add Location" or press Enter to add to your dashboard
-   - Use "Current Location" to add your geographic location
-   - Manage multiple locations with the toolbar controls
-
-### API Endpoints
-
-The application provides several API endpoints for programmatic access:
+### 2. Run the application
 
 ```bash
-# Validate a location
+cd WeatherBlazor
+dotnet run
+```
+
+Then open your browser at `http://localhost:5155/`.
+
+### Run tests
+
+```bash
+cd WeatherBlazor.Tests
+dotnet test
+```
+
+## Project Structure
+
+```
+WeatherBlazor/                        ← Blazor Web App (.NET 10)
+├── Components/
+│   ├── Layout/
+│   │   ├── MainLayout.razor          ← Header, search bar, theme toggle
+│   │   └── ReconnectModal.razor
+│   ├── Pages/
+│   │   ├── Home.razor                ← Main weather page
+│   │   └── NotFound.razor
+│   └── Weather/
+│       ├── SearchBar.razor           ← Autocomplete location search
+│       ├── CurrentWeatherCard.razor  ← Current conditions
+│       ├── ForecastList.razor        ← 10-day forecast
+│       ├── AstronomyCard.razor       ← Sun/moon information
+│       ├── SafetyMetrics.razor       ← UV Index + Air Quality
+│       └── AlertsSection.razor       ← Collapsible weather alerts
+├── Models/
+│   └── WeatherModels.cs              ← All data models (C# records/classes)
+├── Services/
+│   ├── IWeatherService.cs            ← Service interface
+│   ├── WeatherApiService.cs          ← WeatherAPI.com implementation
+│   ├── SafetyFeaturesService.cs      ← UV + AQI enrichment
+│   └── AstronomyService.cs           ← Moon phase + daylight enrichment
+└── wwwroot/
+    └── app.css                       ← Weather app styles (light + dark)
+
+WeatherBlazor.Tests/                  ← xUnit unit tests
+├── SafetyFeaturesServiceTests.cs
+└── AstronomyServiceTests.cs
+```
+
+## Architecture
+
+The application uses **Blazor Server** with interactive server-side rendering:
+
+- **`IWeatherService`** — abstraction layer; swap providers by implementing this interface
+- **`WeatherApiService`** — concrete implementation using `HttpClient` + `System.Text.Json`
+- **`SafetyFeaturesService`** — static enrichment for UV Index and Air Quality
+- **`AstronomyService`** — static enrichment for astronomy data and moon phases
+- Dependency injection via `Program.cs`; API key read from `WeatherApiKey` config or `WEATHER_API_KEY` env var
+
+
 curl "http://localhost:5000/api/validate-location?location=New York"
 
 # Search for locations

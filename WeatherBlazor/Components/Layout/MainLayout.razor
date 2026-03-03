@@ -1,0 +1,53 @@
+@inherits LayoutComponentBase
+
+<FluentDesignTheme @bind-Mode="_themeMode"
+                   CustomColor="#0078d4" />
+
+<div class="app-layout" data-theme="@(_darkMode ? "dark" : "light")">
+    <header class="app-header">
+        <div class="header-left">
+            <span class="app-logo">🌤️</span>
+            <span class="app-title">Weather Forecast</span>
+        </div>
+
+        <div class="header-center">
+            <SearchBar OnSearch="OnSearch" />
+        </div>
+
+        <div class="header-right">
+            <div class="theme-toggle-container" title="@(_darkMode ? "Switch to light mode" : "Switch to dark mode")">
+                <span>🌙</span>
+                <FluentSwitch @bind-Value="_darkMode"
+                              @bind-Value:after="OnThemeChanged"
+                              aria-label="Toggle dark mode" />
+            </div>
+        </div>
+    </header>
+
+    <main class="app-main">
+        @Body
+    </main>
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">🗙</span>
+</div>
+
+@code {
+    [Inject] private NavigationManager Nav { get; set; } = default!;
+
+    private DesignThemeModes _themeMode = DesignThemeModes.Light;
+    private bool _darkMode;
+
+    private void OnSearch(string query)
+    {
+        Nav.NavigateTo($"/?location={Uri.EscapeDataString(query)}");
+    }
+
+    private void OnThemeChanged()
+    {
+        _themeMode = _darkMode ? DesignThemeModes.Dark : DesignThemeModes.Light;
+    }
+}

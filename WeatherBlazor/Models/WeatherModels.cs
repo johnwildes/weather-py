@@ -193,14 +193,31 @@ public class AstronomyInfo
     public string DaylightDuration { get; set; } = "";
 }
 
+// ── Extended Astronomy Forecast Day ──────────────────────────────────────────
+public class ExtendedAstronomyInfo
+{
+    public string Date            { get; set; } = "";
+    public string DayLabel        { get; set; } = "";
+    public string Sunrise         { get; set; } = "";
+    public string Sunset          { get; set; } = "";
+    public string DaylightDuration { get; set; } = "";
+    public string Moonrise        { get; set; } = "";
+    public string Moonset         { get; set; } = "";
+    public bool   HasMoonrise     { get; set; }
+    public bool   HasMoonset      { get; set; }
+    public string MoonPhase       { get; set; } = "";
+    public string MoonPhaseEmoji  { get; set; } = "🌕";
+}
+
 // ── Full Weather View Model ───────────────────────────────────────────────────
 public class WeatherViewModel
 {
-    public Location        Location      { get; set; } = new();
-    public CurrentWeather  Current       { get; set; } = new();
-    public Forecast        Forecast      { get; set; } = new();
-    public UvInfo?         UvInfo        { get; set; }
-    public AqiInfo?        AqiInfo       { get; set; }
-    public List<AlertInfo> AlertsInfo    { get; set; } = [];
-    public AstronomyInfo?  AstronomyInfo { get; set; }
+    public Location        Location                  { get; set; } = new();
+    public CurrentWeather  Current                   { get; set; } = new();
+    public Forecast        Forecast                  { get; set; } = new();
+    public UvInfo?         UvInfo                    { get; set; }
+    public AqiInfo?        AqiInfo                   { get; set; }
+    public List<AlertInfo> AlertsInfo                { get; set; } = [];
+    public AstronomyInfo?  AstronomyInfo             { get; set; }
+    public List<ExtendedAstronomyInfo> ExtendedAstronomyForecast { get; set; } = [];
 }

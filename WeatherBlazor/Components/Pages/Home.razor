@@ -34,7 +34,8 @@
 
         @if (_weather.AstronomyInfo is not null)
         {
-            <AstronomyCard Info="@_weather.AstronomyInfo" />
+            <AstronomyCard Info="@_weather.AstronomyInfo"
+                           ExtendedForecast="@_weather.ExtendedAstronomyForecast" />
         }
 
         <SafetyMetrics UvInfo="@_weather.UvInfo" AqiInfo="@_weather.AqiInfo" />

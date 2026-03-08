@@ -35,7 +35,7 @@ public static class AstronomyService
             Moonset          = astro.Moonset,
             MoonPhase        = astro.MoonPhase,
             MoonPhaseEmoji   = MoonPhaseEmojis.TryGetValue(astro.MoonPhase, out var emoji) ? emoji : "🌕",
-            MoonIllumination = astro.MoonIllumination,
+            MoonIllumination = astro.MoonIllumination.ToString(),
             DaylightDuration = CalculateDaylight(astro.Sunrise, astro.Sunset)
         };
     }

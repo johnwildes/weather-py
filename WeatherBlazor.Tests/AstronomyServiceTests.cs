@@ -8,7 +8,7 @@ public class AstronomyServiceTests
     [Fact]
     public void Enrich_SetsAstronomyInfo_WhenForecastDayPresent()
     {
-        var vm = MakeViewModel("07:30 AM", "05:45 PM", "Full Moon", "100");
+        var vm = MakeViewModel("07:30 AM", "05:45 PM", "Full Moon", 100);
         AstronomyService.Enrich(vm);
 
         Assert.NotNull(vm.AstronomyInfo);
@@ -21,7 +21,7 @@ public class AstronomyServiceTests
     [Fact]
     public void Enrich_SetsDefaultEmoji_WhenPhaseUnknown()
     {
-        var vm = MakeViewModel("06:00 AM", "07:00 PM", "Unknown Phase", "50");
+        var vm = MakeViewModel("06:00 AM", "07:00 PM", "Unknown Phase", 50);
         AstronomyService.Enrich(vm);
 
         Assert.Equal("🌕", vm.AstronomyInfo?.MoonPhaseEmoji);
@@ -38,7 +38,7 @@ public class AstronomyServiceTests
     [InlineData("Waning Crescent", "🌘")]
     public void Enrich_MoonPhaseEmoji_MatchesPhase(string phase, string expectedEmoji)
     {
-        var vm = MakeViewModel("06:00 AM", "06:00 PM", phase, "50");
+        var vm = MakeViewModel("06:00 AM", "06:00 PM", phase, 50);
         AstronomyService.Enrich(vm);
 
         Assert.Equal(expectedEmoji, vm.AstronomyInfo?.MoonPhaseEmoji);
@@ -55,7 +55,7 @@ public class AstronomyServiceTests
     // ── Helpers ────────────────────────────────────────────────────────────
 
     private static WeatherViewModel MakeViewModel(
-        string sunrise, string sunset, string moonPhase, string moonIllumination)
+        string sunrise, string sunset, string moonPhase, int moonIllumination)
     {
         return new WeatherViewModel
         {

@@ -20,7 +20,10 @@ public class WeatherApiService : IWeatherService
     {
         _http   = http;
         _logger = logger;
-        _apiKey = config["WeatherApiKey"] ?? Environment.GetEnvironmentVariable("WEATHER_API_KEY") ?? "";
+        var configKey = config["WeatherApiKey"];
+        _apiKey = string.IsNullOrEmpty(configKey)
+            ? (Environment.GetEnvironmentVariable("WEATHER_API_KEY") ?? "")
+            : configKey;
 
         if (string.IsNullOrEmpty(_apiKey))
             _logger.LogWarning("WEATHER_API_KEY is not configured. Weather data will not be available.");

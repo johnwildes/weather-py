@@ -1,0 +1,71 @@
+@* 10-day forecast list *@
+
+<FluentCard class="forecast-card">
+    <h3 class="forecast-title">10-Day Forecast</h3>
+    <div class="forecast-list">
+        @foreach (var day in ForecastDays)
+        {
+            <div class="forecast-day-row">
+                <div class="day-info">
+                    <span class="day-name">@FormatDate(day.Date)</span>
+                    <span class="day-date">@day.Date</span>
+                </div>
+
+                <div class="day-condition">
+                    <img src="@day.Day.Condition.IconUrl"
+                         alt="@day.Day.Condition.Text"
+                         class="forecast-icon" />
+                    <span class="condition-text">@day.Day.Condition.Text</span>
+                </div>
+
+                <div class="day-temps">
+                    <span class="temp-high">
+                        @(UseFahrenheit ? $"{day.Day.MaxTempF}°" : $"{day.Day.MaxTempC}°")
+                    </span>
+                    <div class="temp-bar">
+                        @{
+                            var range  = day.Day.MaxTempC - day.Day.MinTempC;
+                            var pct    = range > 0 ? (int)Math.Min(100, Math.Max(0, range / 30.0 * 100)) : 30;
+                        }
+                        <div class="temp-bar-fill" style="width: @pct%;"></div>
+                    </div>
+                    <span class="temp-low">
+                        @(UseFahrenheit ? $"{day.Day.MinTempF}°" : $"{day.Day.MinTempC}°")
+                    </span>
+                </div>
+
+                @if (day.Day.ChanceOfRain > 0)
+                {
+                    <div class="day-rain">
+                        <span class="rain-chance">💧 @day.Day.ChanceOfRain%</span>
+                    </div>
+                }
+                else if (day.Day.ChanceOfSnow > 0)
+                {
+                    <div class="day-rain">
+                        <span class="rain-chance">❄️ @day.Day.ChanceOfSnow%</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="day-rain"></div>
+                }
+            </div>
+        }
+    </div>
+</FluentCard>
+
+@code {
+    [Parameter, EditorRequired] public List<ForecastDay> ForecastDays  { get; set; } = [];
+    [Parameter]                 public bool              UseFahrenheit { get; set; }
+
+    private string FormatDate(string dateStr)
+    {
+        if (!DateTime.TryParse(dateStr, out var date)) return dateStr;
+        var today = DateTime.Today;
+        if (date.Date == today)            return "Today";
+        if (date.Date == today.AddDays(1)) return "Tomorrow";
+        if (date.Date == today.AddDays(-1)) return "Yesterday";
+        return date.ToString("ddd, MMM d");
+    }
+}

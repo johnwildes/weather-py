@@ -1,0 +1,144 @@
+@* Sun & Moon card: current day plus optional extended multi-day outlook *@
+
+<FluentCard class="astronomy-card">
+    <div class="astronomy-header">
+        <div class="astronomy-title-group">
+            <span class="astronomy-icon">☀️</span>
+            <h3 class="astronomy-title">Sun &amp; Moon</h3>
+        </div>
+        @if (ExtendedForecast.Count > 0)
+        {
+            <div class="astronomy-toggle-group">
+                <FluentSwitch @bind-Value="_showExtended"
+                              aria-label="Toggle extended astronomy outlook" />
+                <span class="toggle-label">Extended Outlook</span>
+            </div>
+        }
+    </div>
+
+    <hr class="astronomy-divider" />
+
+    @if (!_showExtended)
+    {
+        @* Current day view *@
+        <div class="astronomy-grid-items">
+            <div class="astronomy-item">
+                <span class="astronomy-item-icon">🌅</span>
+                <div class="astronomy-details">
+                    <span class="astronomy-label">Sunrise</span>
+                    <span class="astronomy-value">@Info.Sunrise</span>
+                </div>
+            </div>
+
+            <div class="astronomy-item">
+                <span class="astronomy-item-icon">🌇</span>
+                <div class="astronomy-details">
+                    <span class="astronomy-label">Sunset</span>
+                    <span class="astronomy-value">@Info.Sunset</span>
+                </div>
+            </div>
+
+            @if (!string.IsNullOrEmpty(Info.DaylightDuration))
+            {
+                <div class="astronomy-item">
+                    <span class="astronomy-item-icon">☀️</span>
+                    <div class="astronomy-details">
+                        <span class="astronomy-label">Daylight</span>
+                        <span class="astronomy-value">@Info.DaylightDuration</span>
+                    </div>
+                </div>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(Info.Moonrise))
+            {
+                <div class="astronomy-item">
+                    <span class="astronomy-item-icon">🌄</span>
+                    <div class="astronomy-details">
+                        <span class="astronomy-label">Moonrise</span>
+                        <span class="astronomy-value">@Info.Moonrise</span>
+                    </div>
+                </div>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(Info.Moonset))
+            {
+                <div class="astronomy-item">
+                    <span class="astronomy-item-icon">🌆</span>
+                    <div class="astronomy-details">
+                        <span class="astronomy-label">Moonset</span>
+                        <span class="astronomy-value">@Info.Moonset</span>
+                    </div>
+                </div>
+            }
+
+            <div class="astronomy-item">
+                <span class="astronomy-item-icon">@Info.MoonPhaseEmoji</span>
+                <div class="astronomy-details">
+                    <span class="astronomy-label">Moon Phase</span>
+                    <span class="astronomy-value">@Info.MoonPhase</span>
+                    @if (!string.IsNullOrEmpty(Info.MoonIllumination))
+                    {
+                        <span class="astronomy-subvalue">@Info.MoonIllumination% illuminated</span>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        @* Extended multi-day view *@
+        <div class="astronomy-forecast-list">
+            @foreach (var day in ExtendedForecast)
+            {
+                <div class="astronomy-forecast-day">
+                    <div class="forecast-day-header">
+                        <span class="forecast-day-name">@day.DayLabel</span>
+                        <span class="forecast-day-date">@day.Date</span>
+                    </div>
+                    <div class="astronomy-mini-grid">
+                        <div class="astronomy-mini-item">
+                            <span class="mini-icon">🌅</span>
+                            <span class="mini-value">@day.Sunrise</span>
+                        </div>
+                        <div class="astronomy-mini-item">
+                            <span class="mini-icon">🌇</span>
+                            <span class="mini-value">@day.Sunset</span>
+                        </div>
+                        @if (!string.IsNullOrEmpty(day.DaylightDuration))
+                        {
+                            <div class="astronomy-mini-item">
+                                <span class="mini-icon">☀️</span>
+                                <span class="mini-value">@day.DaylightDuration</span>
+                            </div>
+                        }
+                        @if (day.HasMoonrise)
+                        {
+                            <div class="astronomy-mini-item">
+                                <span class="mini-icon">🌄</span>
+                                <span class="mini-value">@day.Moonrise</span>
+                            </div>
+                        }
+                        @if (day.HasMoonset)
+                        {
+                            <div class="astronomy-mini-item">
+                                <span class="mini-icon">🌆</span>
+                                <span class="mini-value">@day.Moonset</span>
+                            </div>
+                        }
+                    </div>
+                    <div class="astronomy-mini-item moon-phase-item">
+                        <span class="mini-icon">@day.MoonPhaseEmoji</span>
+                        <span class="mini-value">@day.MoonPhase</span>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</FluentCard>
+
+@code {
+    [Parameter, EditorRequired] public AstronomyInfo              Info             { get; set; } = default!;
+    [Parameter]                 public List<ExtendedAstronomyInfo> ExtendedForecast { get; set; } = [];
+
+    private bool _showExtended;
+}

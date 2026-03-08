@@ -14,6 +14,10 @@ builder.Services.AddFluentUIComponents();
 // Weather service (typed HttpClient)
 builder.Services.AddHttpClient<IWeatherService, WeatherApiService>();
 
+// AI chat service (typed HttpClient) + shared weather context for ChatWidget
+builder.Services.AddHttpClient<IAIService, AzureOpenAIService>();
+builder.Services.AddScoped<ChatStateService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -66,6 +66,7 @@
 @code {
     [Inject] private IWeatherService WeatherService { get; set; } = default!;
     [Inject] private NavigationManager Nav           { get; set; } = default!;
+    [Inject] private ChatStateService  ChatState     { get; set; } = default!;
 
     [SupplyParameterFromQuery(Name = "location")]
     public string? Location { get; set; }
@@ -87,6 +88,9 @@
 
             if (_weather is null)
                 _errorMessage = $"Unable to fetch weather data for '{Location}'. Please try a different location.";
+
+            // Share weather context with the ChatWidget via scoped service
+            ChatState.CurrentWeather = _weather;
 
             _loading = false;
         }

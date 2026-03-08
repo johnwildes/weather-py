@@ -1,9 +1,10 @@
 @inherits LayoutComponentBase
+@inject IJSRuntime JS
 
 <FluentDesignTheme @bind-Mode="_themeMode"
                    CustomColor="#0078d4" />
 
-<div class="app-layout" data-theme="@(_darkMode ? "dark" : "light")">
+<div class="app-layout">
     <header class="app-header">
         <div class="header-left">
             <span class="app-logo">🌤️</span>
@@ -16,10 +17,11 @@
 
         <div class="header-right">
             <div class="theme-toggle-container" title="@(_darkMode ? "Switch to light mode" : "Switch to dark mode")">
-                <span>🌙</span>
+                <span class="theme-icon theme-icon-light">☀️</span>
                 <FluentSwitch @bind-Value="_darkMode"
                               @bind-Value:after="OnThemeChanged"
                               aria-label="Toggle dark mode" />
+                <span class="theme-icon theme-icon-dark">🌙</span>
             </div>
         </div>
     </header>
@@ -48,8 +50,48 @@
         Nav.NavigateTo($"/?location={Uri.EscapeDataString(query)}");
     }
 
-    private void OnThemeChanged()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Restore saved theme from localStorage (prevents flash on reload)
+            try
+            {
+                var saved = await JS.InvokeAsync<string?>("localStorage.getItem", "weather_theme");
+                if (saved == "dark")
+                {
+                    _darkMode  = true;
+                    _themeMode = DesignThemeModes.Dark;
+                    StateHasChanged();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Theme] Could not read localStorage: {ex.Message}");
+            }
+            await ApplyThemeToDocumentAsync(_darkMode);
+        }
+    }
+
+    private async Task OnThemeChanged()
     {
         _themeMode = _darkMode ? DesignThemeModes.Dark : DesignThemeModes.Light;
+        await ApplyThemeToDocumentAsync(_darkMode);
+        await JS.InvokeVoidAsync("localStorage.setItem", "weather_theme", _darkMode ? "dark" : "light");
+    }
+
+    /// <summary>Sets data-theme on &lt;html&gt; so body/html background inherits the dark CSS variables.</summary>
+    private async Task ApplyThemeToDocumentAsync(bool dark)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("document.documentElement.setAttribute",
+                "data-theme", dark ? "dark" : "light");
+        }
+        catch
+        {
+            // JS interop is not available during static prerendering; the attribute
+            // will be applied again in OnAfterRenderAsync once the circuit is connected.
+        }
     }
 }

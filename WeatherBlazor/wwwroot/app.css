@@ -14,7 +14,8 @@
     --radius:           8px;
 }
 
-[data-theme="dark"] {
+/* Applied to <html> via JS interop so html/body background inherits correctly */
+html[data-theme="dark"] {
     --color-bg:         #1a1a2e;
     --color-surface:    #16213e;
     --color-border:     #2a2a4a;
@@ -82,6 +83,20 @@ html, body {
     color: var(--color-header-fg);
     cursor: pointer;
 }
+
+/* Sun/moon icons – each variant sets its own opacity explicitly */
+.theme-icon {
+    font-size: 1.1rem;
+    line-height: 1;
+    transition: opacity 0.25s ease;
+    user-select: none;
+}
+
+.theme-icon-light { opacity: 1;   }   /* bright in light mode */
+.theme-icon-dark  { opacity: 0.5; }   /* dimmed in light mode */
+
+html[data-theme="dark"] .theme-icon-light { opacity: 0.5; }   /* dimmed in dark mode */
+html[data-theme="dark"] .theme-icon-dark  { opacity: 1;   }   /* bright in dark mode */
 
 .app-main {
     flex: 1;

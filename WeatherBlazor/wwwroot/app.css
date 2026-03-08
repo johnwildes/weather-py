@@ -59,19 +59,20 @@ html, body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    flex-shrink: 0;
+    flex: 1;
 }
 
 .app-logo  { font-size: 1.5rem; }
 .app-title { font-size: 1.1rem; font-weight: 600; white-space: nowrap; }
 
-.header-center { flex: 1; max-width: 500px; }
+.header-center { flex: 0 0 auto; width: min(500px, 45%); }
 
 .header-right {
     display: flex;
     align-items: center;
+    justify-content: flex-end;
     gap: 0.75rem;
-    flex-shrink: 0;
+    flex: 1;
 }
 
 .theme-toggle-container {

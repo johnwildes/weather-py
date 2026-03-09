@@ -27,3 +27,8 @@ build/
 .ipynb_checkpoints/
 # Ignore Node.js dependencies
 node_modules/
+
+# .NET / C# build artefacts
+obj/
+bin/
+*.user

@@ -1,0 +1,52 @@
+@* Weather alerts section with collapsible cards *@
+
+@if (Alerts.Count > 0)
+{
+    <div class="alerts-section">
+        @foreach (var alert in Alerts)
+        {
+            var cardClass = IsCollapsed(alert) ? "alert-card collapsed" : "alert-card";
+            var cardStyle = $"border-left: 8px solid {alert.Color};";
+            <FluentCard class="@cardClass" style="@cardStyle">
+                <div class="alert-header" @onclick="() => ToggleAlert(alert)">
+                    <span class="alert-icon">@alert.Icon</span>
+                    <h3 class="alert-headline">@alert.Headline</h3>
+                    <span class="alert-toggle-icon">@(IsCollapsed(alert) ? "▼" : "▲")</span>
+                </div>
+
+                @if (!IsCollapsed(alert))
+                {
+                    <div class="alert-details">
+                        <div class="alert-meta">
+                            <span class="alert-severity" style="@($"color: {alert.Color};")">@alert.Severity</span>
+                            <span class="alert-urgency">@alert.Urgency</span>
+                        </div>
+                        <p class="alert-description">@alert.Description</p>
+                        @if (!string.IsNullOrEmpty(alert.Instruction))
+                        {
+                            <div class="alert-instruction">
+                                <strong>⚠️ Safety Instructions:</strong> @alert.Instruction
+                            </div>
+                        }
+                    </div>
+                }
+            </FluentCard>
+        }
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired] public List<AlertInfo> Alerts { get; set; } = [];
+
+    private readonly HashSet<AlertInfo> _expanded = [];
+
+    private bool IsCollapsed(AlertInfo alert) => !_expanded.Contains(alert);
+
+    private void ToggleAlert(AlertInfo alert)
+    {
+        if (_expanded.Contains(alert))
+            _expanded.Remove(alert);
+        else
+            _expanded.Add(alert);
+    }
+}

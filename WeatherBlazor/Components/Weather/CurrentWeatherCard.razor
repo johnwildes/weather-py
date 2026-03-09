@@ -1,0 +1,75 @@
+@* Current weather card showing temp, conditions, and key stats *@
+
+<FluentCard class="current-weather-card">
+    <div class="current-weather-header">
+        <div class="location-info">
+            <h2 class="city-name">@Location.Name</h2>
+            <p class="region-country">
+                @Location.Region
+                @if (!string.IsNullOrEmpty(Location.Region) && !string.IsNullOrEmpty(Location.Country))
+                { <text>, </text> }
+                @Location.Country
+            </p>
+        </div>
+
+        <div class="current-temp-display">
+            <div class="temp-unit-toggle">
+                <span class="unit-label @(UseFahrenheit ? "" : "active")">°C</span>
+                <FluentSwitch @bind-Value="UseFahrenheit"
+                              @bind-Value:after="OnUnitChanged"
+                              aria-label="Toggle temperature unit" />
+                <span class="unit-label @(UseFahrenheit ? "active" : "")">°F</span>
+            </div>
+            <img src="@Current.Condition.IconUrl"
+                 alt="@Current.Condition.Text"
+                 class="current-condition-icon" />
+            <span class="current-temp">
+                @(UseFahrenheit ? $"{Current.TempF}°F" : $"{Current.TempC}°C")
+            </span>
+        </div>
+    </div>
+
+    <div class="current-weather-details">
+        <p class="condition-text">@Current.Condition.Text</p>
+        <div class="weather-stats">
+            <div class="stat-item">
+                <span class="stat-label">Feels like</span>
+                <span class="stat-value">
+                    @(UseFahrenheit ? $"{Current.FeelsLikeF}°F" : $"{Current.FeelsLikeC}°C")
+                </span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Humidity</span>
+                <span class="stat-value">@Current.Humidity%</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Wind</span>
+                <span class="stat-value">@Current.WindKph km/h @Current.WindDir</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Visibility</span>
+                <span class="stat-value">@Current.VisKm km</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Pressure</span>
+                <span class="stat-value">@Current.PressureMb mb</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">UV Index</span>
+                <span class="stat-value">@Current.Uv</span>
+            </div>
+        </div>
+    </div>
+</FluentCard>
+
+@code {
+    [Parameter, EditorRequired] public Location        Location       { get; set; } = default!;
+    [Parameter, EditorRequired] public CurrentWeather  Current        { get; set; } = default!;
+    [Parameter]                 public bool            UseFahrenheit  { get; set; }
+    [Parameter]                 public EventCallback<bool> UseFahrenheitChanged { get; set; }
+
+    private async Task OnUnitChanged()
+    {
+        await UseFahrenheitChanged.InvokeAsync(UseFahrenheit);
+    }
+}

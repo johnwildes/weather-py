@@ -6,6 +6,12 @@ on:
       - master
 
 jobs:
+  # ──────────────────────────────────────────────────────────────────────────
+  # Job 1: Build and deploy the existing Python / Flask weather app.
+  # Uses secrets: AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUB_ID,
+  #               GHCR_USERNAME, GHCR_PAT, CONTAINER_APP_NAME, RESOURCE_GROUP,
+  #               AZURE_OPENAI_API_KEY, AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_DEPLOYMENT
+  # ──────────────────────────────────────────────────────────────────────────
   build-and-deploy:
     name: Build and Deploy to Azure Container Apps
     runs-on: ubuntu-latest
@@ -49,3 +55,121 @@ jobs:
             "AZURE_OPENAI_ENDPOINT=${{ secrets.AZURE_OPENAI_ENDPOINT }}" \
             "AZURE_OPENAI_DEPLOYMENT=${{ secrets.AZURE_OPENAI_DEPLOYMENT }}" \
             "AZURE_OPENAI_API_VERSION=2024-10-21"
+
+  # ──────────────────────────────────────────────────────────────────────────
+  # Job 2: Build and deploy the Blazor Server weather app.
+  #
+  # This job builds the WeatherBlazor project (located in WeatherBlazor/) using
+  # Dockerfile.blazor and deploys it as a *separate* Azure Container App so that
+  # Azure assigns it its own unique FQDN/URL.
+  #
+  # Required repository secrets (in addition to those shared with Job 1):
+  #   BLAZOR_CONTAINER_APP_NAME   – Unique name for the Blazor Container App
+  #                                  (e.g. "weather-blazor").  Must differ from
+  #                                  CONTAINER_APP_NAME to receive a distinct URL.
+  #   CONTAINER_APP_ENVIRONMENT   – Name of the existing Azure Container Apps
+  #                                  managed environment (shared with the Python app).
+  #   WEATHER_API_KEY             – API key for weatherapi.com used by the Blazor app.
+  #
+  # Example: once deployed, the Blazor app will be reachable at a URL such as
+  #   https://weather-blazor.<unique-suffix>.<region>.azurecontainerapps.io
+  # ──────────────────────────────────────────────────────────────────────────
+  build-and-deploy-blazor:
+    name: Build and Deploy Blazor App to Azure Container Apps
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # Require write permission to fetch an OIDC token.
+
+    steps:
+    # Checkout the repository so both Dockerfile.blazor and WeatherBlazor/ are available.
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    # Log in to Azure using the same OIDC-based federated credentials as the Python job.
+    - name: Log in to Azure
+      uses: azure/login@v1
+      with:
+        client-id: ${{ secrets.AZURE_CLIENT_ID }}
+        tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+        subscription-id: ${{ secrets.AZURE_SUB_ID }}
+        enable-AzPSSession: true
+
+    # Build the Blazor Docker image using the dedicated multi-stage Dockerfile.
+    # The build context is the repository root so that WeatherBlazor/ is accessible.
+    - name: Build Blazor Docker image
+      run: |
+        docker build \
+          -f Dockerfile.blazor \
+          -t ghcr.io/${{ secrets.GHCR_USERNAME }}/weather-blazor:latest \
+          .
+
+    # Authenticate to GHCR and push the Blazor image under a distinct tag
+    # (weather-blazor) so it does not overwrite the Python app image (weather-py).
+    - name: Push Blazor Docker image to GHCR
+      run: |
+        echo "${{ secrets.GHCR_PAT }}" | docker login ghcr.io -u ${{ secrets.GHCR_USERNAME }} --password-stdin
+        docker push ghcr.io/${{ secrets.GHCR_USERNAME }}/weather-blazor:latest
+
+    # Deploy the Blazor container to a new (or existing) Azure Container App.
+    #
+    # Strategy:
+    #   1. Check whether the Blazor Container App already exists.
+    #   2. If it does NOT exist, create it inside the same Container Apps environment
+    #      and resource group as the Python app, with external ingress on port 80.
+    #      Azure will assign a unique public URL automatically.
+    #   3. If it already exists, update the image and environment variables.
+    #
+    # ASP.NET Core reads nested config via double-underscore environment variables
+    # (e.g. AzureOpenAI__ApiKey maps to AzureOpenAI:ApiKey in appsettings.json).
+    - name: Deploy Blazor app to Azure Container Apps
+      run: |
+        BLAZOR_APP="${{ secrets.BLAZOR_CONTAINER_APP_NAME }}"
+        RESOURCE_GROUP="${{ secrets.RESOURCE_GROUP }}"
+        IMAGE="ghcr.io/${{ secrets.GHCR_USERNAME }}/weather-blazor:latest"
+
+        # Validate that required secrets are present before attempting deployment.
+        if [ -z "$BLAZOR_APP" ] || [ -z "$RESOURCE_GROUP" ]; then
+          echo "ERROR: BLAZOR_CONTAINER_APP_NAME and RESOURCE_GROUP secrets must be set."
+          exit 1
+        fi
+
+        # Check whether the Blazor Container App already exists in the resource group.
+        APP_EXISTS=$(az containerapp show \
+          --name "$BLAZOR_APP" \
+          --resource-group "$RESOURCE_GROUP" \
+          --query "name" \
+          --output tsv 2>/dev/null || echo "")
+
+        if [ -n "$APP_EXISTS" ]; then
+          # ── Update path: app exists, refresh image and environment variables. ──
+          echo "Updating existing Blazor Container App: $BLAZOR_APP"
+          az containerapp update \
+            --name "$BLAZOR_APP" \
+            --resource-group "$RESOURCE_GROUP" \
+            --image "$IMAGE" \
+            --set-env-vars \
+              "WeatherApiKey=${{ secrets.WEATHER_API_KEY }}" \
+              "AzureOpenAI__ApiKey=${{ secrets.AZURE_OPENAI_API_KEY }}" \
+              "AzureOpenAI__Endpoint=${{ secrets.AZURE_OPENAI_ENDPOINT }}" \
+              "AzureOpenAI__Deployment=${{ secrets.AZURE_OPENAI_DEPLOYMENT }}" \
+              "AzureOpenAI__ApiVersion=2024-10-21"
+        else
+          # ── Create path: first-time deployment; provision a new Container App. ──
+          echo "Creating new Blazor Container App: $BLAZOR_APP"
+          az containerapp create \
+            --name "$BLAZOR_APP" \
+            --resource-group "$RESOURCE_GROUP" \
+            --environment "${{ secrets.CONTAINER_APP_ENVIRONMENT }}" \
+            --image "$IMAGE" \
+            --target-port 80 \
+            --ingress external \
+            --registry-server ghcr.io \
+            --registry-username "${{ secrets.GHCR_USERNAME }}" \
+            --registry-password "${{ secrets.GHCR_PAT }}" \
+            --env-vars \
+              "WeatherApiKey=${{ secrets.WEATHER_API_KEY }}" \
+              "AzureOpenAI__ApiKey=${{ secrets.AZURE_OPENAI_API_KEY }}" \
+              "AzureOpenAI__Endpoint=${{ secrets.AZURE_OPENAI_ENDPOINT }}" \
+              "AzureOpenAI__Deployment=${{ secrets.AZURE_OPENAI_DEPLOYMENT }}" \
+              "AzureOpenAI__ApiVersion=2024-10-21"
+        fi

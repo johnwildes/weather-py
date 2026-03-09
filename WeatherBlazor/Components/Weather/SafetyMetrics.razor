@@ -1,0 +1,60 @@
+@* UV Index and Air Quality safety metrics *@
+
+<div class="safety-metrics-section">
+    @if (UvInfo is not null)
+    {
+        <FluentCard class="safety-card uv-card">
+            <div class="safety-header">
+                <span class="safety-icon">☀️</span>
+                <h3 class="safety-title">UV Index</h3>
+            </div>
+            <div class="safety-content">
+                <div class="safety-value-display">
+                    <span class="safety-value" style="color: @UvInfo.Color;">@UvInfo.Value</span>
+                    <span class="safety-level" style="background-color: @UvInfo.Color;">@UvInfo.Level</span>
+                </div>
+                <p class="safety-recommendation">@UvInfo.Recommendation</p>
+            </div>
+        </FluentCard>
+    }
+
+    @if (AqiInfo is not null)
+    {
+        <FluentCard class="safety-card aqi-card">
+            <div class="safety-header">
+                <span class="safety-icon">🌫️</span>
+                <h3 class="safety-title">Air Quality</h3>
+            </div>
+            <div class="safety-content">
+                <div class="safety-value-display">
+                    <span class="safety-level" style="background-color: @AqiInfo.Color;">@AqiInfo.Level</span>
+                </div>
+                <p class="safety-recommendation">@AqiInfo.Guidance</p>
+                @if (AqiInfo.Pm25.HasValue || AqiInfo.Pm10.HasValue)
+                {
+                    <div class="aqi-details">
+                        @if (AqiInfo.Pm25.HasValue)
+                        {
+                            <div class="aqi-stat">
+                                <span class="aqi-label">PM2.5:</span>
+                                <span class="aqi-value">@AqiInfo.Pm25.Value.ToString("F1") µg/m³</span>
+                            </div>
+                        }
+                        @if (AqiInfo.Pm10.HasValue)
+                        {
+                            <div class="aqi-stat">
+                                <span class="aqi-label">PM10:</span>
+                                <span class="aqi-value">@AqiInfo.Pm10.Value.ToString("F1") µg/m³</span>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </FluentCard>
+    }
+</div>
+
+@code {
+    [Parameter] public UvInfo?  UvInfo  { get; set; }
+    [Parameter] public AqiInfo? AqiInfo { get; set; }
+}

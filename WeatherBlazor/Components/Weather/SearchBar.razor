@@ -1,0 +1,94 @@
+@* Search bar with autocomplete for location lookup *@
+
+<div class="search-container">
+    <FluentSearch @bind-Value="SearchQuery"
+                  @oninput="OnSearchInput"
+                  @onkeydown="OnKeyDown"
+                  Placeholder="Search city, ZIP code, or coordinates…"
+                  aria-label="Location search"
+                  class="search-input" />
+
+    @if (_suggestions.Count > 0)
+    {
+        <div class="suggestions-dropdown">
+            @foreach (var (item, index) in _suggestions.Select((s, i) => (s, i)))
+            {
+                <div class="suggestion-item @(index == _highlightedIndex ? "highlighted" : "")"
+                     @onclick="() => SelectSuggestion(item)"
+                     @onmouseover="() => _highlightedIndex = index">
+                    📍 @item.Display
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public EventCallback<string> OnSearch { get; set; }
+    [Inject]    private IWeatherService WeatherService { get; set; } = default!;
+
+    private string _searchQuery = "";
+    private List<SearchResult> _suggestions = [];
+    private int _highlightedIndex = -1;
+    private CancellationTokenSource? _debounce;
+
+    private string SearchQuery
+    {
+        get => _searchQuery;
+        set { _searchQuery = value; }
+    }
+
+    private async Task OnSearchInput(ChangeEventArgs e)
+    {
+        _searchQuery = e.Value?.ToString() ?? "";
+        _highlightedIndex = -1;
+
+        _debounce?.Cancel();
+        _debounce = new CancellationTokenSource();
+
+        try
+        {
+            await Task.Delay(300, _debounce.Token);
+            if (_searchQuery.Length >= 2)
+                _suggestions = await WeatherService.SearchLocationsAsync(_searchQuery);
+            else
+                _suggestions = [];
+        }
+        catch (TaskCanceledException) { }
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case "ArrowDown":
+                _highlightedIndex = Math.Min(_highlightedIndex + 1, _suggestions.Count - 1);
+                break;
+            case "ArrowUp":
+                _highlightedIndex = Math.Max(_highlightedIndex - 1, 0);
+                break;
+            case "Enter":
+                if (_highlightedIndex >= 0 && _highlightedIndex < _suggestions.Count)
+                    await SelectSuggestion(_suggestions[_highlightedIndex]);
+                else if (!string.IsNullOrWhiteSpace(_searchQuery))
+                    await SubmitSearch(_searchQuery);
+                break;
+            case "Escape":
+                _suggestions = [];
+                break;
+        }
+    }
+
+    private async Task SelectSuggestion(SearchResult result)
+    {
+        _searchQuery = result.Display;
+        _suggestions = [];
+        await SubmitSearch(result.Display);
+    }
+
+    private async Task SubmitSearch(string query)
+    {
+        _suggestions = [];
+        await OnSearch.InvokeAsync(query);
+    }
+}

@@ -1,0 +1,30 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherBlazor", "WeatherBlazor\WeatherBlazor.csproj", "{83E33E09-60B0-7905-F2D8-84F6CF4CCF64}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WeatherBlazor.Tests", "WeatherBlazor.Tests\WeatherBlazor.Tests.csproj", "{221282FC-FF3B-00BD-C4CE-FC5D816D7076}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{83E33E09-60B0-7905-F2D8-84F6CF4CCF64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83E33E09-60B0-7905-F2D8-84F6CF4CCF64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83E33E09-60B0-7905-F2D8-84F6CF4CCF64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83E33E09-60B0-7905-F2D8-84F6CF4CCF64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{221282FC-FF3B-00BD-C4CE-FC5D816D7076}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{221282FC-FF3B-00BD-C4CE-FC5D816D7076}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{221282FC-FF3B-00BD-C4CE-FC5D816D7076}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{221282FC-FF3B-00BD-C4CE-FC5D816D7076}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {DAF888F7-A70B-4763-ADE4-FE183259DF60}
+	EndGlobalSection
+EndGlobal

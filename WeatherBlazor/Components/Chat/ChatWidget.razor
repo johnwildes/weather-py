@@ -1,0 +1,249 @@
+@using System.Net
+@using System.Text
+@using System.Text.RegularExpressions
+@inject IAIService       _ai
+@inject ChatStateService _chatState
+@inject IJSRuntime       _js
+@implements IAsyncDisposable
+
+<div class="chat-container">
+    <button class="chat-agent-button @(_isOpen ? "chat-btn-hidden" : "")"
+            @onclick="OpenChat"
+            title="Weather Assistant"
+            aria-label="Open weather assistant">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+        </svg>
+    </button>
+
+    <div class="chat-agent-window @(_isOpen ? "open" : "")">
+        <div class="chat-header">
+            <div class="chat-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                </svg>
+                <span>Weather Assistant</span>
+            </div>
+            <button class="chat-close-btn" @onclick="CloseChat" aria-label="Close chat">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                    <path d="M2.146 2.146a.5.5 0 0 1 .708 0L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854a.5.5 0 0 1 0-.708z"/>
+                </svg>
+            </button>
+        </div>
+
+        <div class="chat-messages" @ref="_messagesRef">
+            @if (_messages.Count == 0)
+            {
+                <div class="chat-welcome">
+                    <p>👋 Hi! I'm your weather assistant.</p>
+                    <p>Ask me anything about the weather@(_chatState.CurrentWeather is not null ? $" in {_chatState.CurrentWeather.Location.Name}" : " in your searched cities")!</p>
+                </div>
+            }
+
+            @foreach (var msg in _messages)
+            {
+                <div class="chat-message @(msg.Role)-message">
+                    <div class="message-avatar">@(msg.Role == "user" ? "👤" : "🤖")</div>
+                    @if (msg.Role == "assistant")
+                    {
+                        <div class="message-content">@((MarkupString)RenderMarkdown(msg.Content))</div>
+                    }
+                    else
+                    {
+                        <div class="message-content">@msg.Content</div>
+                    }
+                </div>
+            }
+
+            @if (_isTyping)
+            {
+                <div class="chat-message assistant-message">
+                    <div class="message-avatar">🤖</div>
+                    <div class="message-content">
+                        <div class="typing-indicator">
+                            <span></span><span></span><span></span>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <div class="chat-input-area">
+            <input class="chat-input"
+                   type="text"
+                   @bind="_inputText"
+                   @bind:event="oninput"
+                   @onkeydown="HandleKeyDown"
+                   placeholder="Ask about the weather…"
+                   disabled="@_isStreaming"
+                   @ref="_inputRef"
+                   aria-label="Chat message" />
+            <button class="chat-send-btn"
+                    @onclick="SendMessage"
+                    disabled="@(_isStreaming || string.IsNullOrWhiteSpace(_inputText))"
+                    aria-label="Send message">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                    <path d="M1.724 1.053a.5.5 0 0 0-.714.545l1.403 4.85a.5.5 0 0 0 .397.354l5.69.953c.268.045.268.434 0 .478l-5.69.953a.5.5 0 0 0-.397.354l-1.403 4.85a.5.5 0 0 0 .714.545l13-6.5a.5.5 0 0 0 0-.894l-13-6.5z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool   _isOpen     = false;
+    private bool   _isStreaming = false;
+    private bool   _isTyping   = false;
+    private string _inputText  = "";
+
+    private readonly List<ChatDisplayMessage> _messages = [];
+    private ElementReference _messagesRef;
+    private ElementReference _inputRef;
+
+    private IJSObjectReference? _module;
+    private CancellationTokenSource _cts = new();
+    private bool _focusInputOnRender;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                _module = await _js.InvokeAsync<IJSObjectReference>(
+                    "import", "./Components/Chat/ChatWidget.razor.js");
+            }
+            catch { /* Ignore during prerender */ }
+        }
+
+        if (_focusInputOnRender && _isOpen)
+        {
+            _focusInputOnRender = false;
+            await ScrollToBottomAsync();
+            await FocusInputAsync();
+        }
+    }
+
+    private void OpenChat()
+    {
+        _isOpen             = true;
+        _focusInputOnRender = true;
+    }
+
+    private void CloseChat() => _isOpen = false;
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !e.ShiftKey)
+            await SendMessage();
+    }
+
+    private async Task SendMessage()
+    {
+        var text = _inputText.Trim();
+        if (string.IsNullOrEmpty(text) || _isStreaming) return;
+
+        _inputText   = "";
+        _isStreaming = true;
+        _isTyping    = true;
+
+        _messages.Add(new ChatDisplayMessage { Role = "user", Content = text });
+        StateHasChanged();
+        await ScrollToBottomAsync();
+
+        // Add empty assistant message placeholder
+        var assistantMsg = new ChatDisplayMessage { Role = "assistant", Content = "" };
+        _messages.Add(assistantMsg);
+        _isTyping = false;
+        StateHasChanged();
+
+        var sb   = new StringBuilder();
+        _cts     = new CancellationTokenSource();
+
+        try
+        {
+            await foreach (var token in _ai.StreamChatAsync(text, _chatState.CurrentWeather, _cts.Token))
+            {
+                sb.Append(token);
+                assistantMsg.Content = sb.ToString();
+                await InvokeAsync(StateHasChanged);
+                await ScrollToBottomAsync();
+            }
+        }
+        catch (OperationCanceledException) { /* User navigated away */ }
+        finally
+        {
+            _isStreaming = false;
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    private async Task ScrollToBottomAsync()
+    {
+        if (_module is null) return;
+        try { await _module.InvokeVoidAsync("scrollToBottom", _messagesRef); }
+        catch { /* Ignore during prerender */ }
+    }
+
+    private async Task FocusInputAsync()
+    {
+        if (_module is null) return;
+        try { await _module.InvokeVoidAsync("focusElement", _inputRef); }
+        catch { /* Ignore during prerender */ }
+    }
+
+    /// <summary>
+    /// Converts a subset of Markdown to HTML.
+    /// Input is HTML-encoded first to prevent XSS, then safe tags are added.
+    /// </summary>
+    private static string RenderMarkdown(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return "";
+
+        // Escape all HTML first to prevent XSS
+        var html = WebUtility.HtmlEncode(text);
+
+        // Code blocks  (``` … ```)
+        html = Regex.Replace(html, @"```([\s\S]*?)```", "<pre><code>$1</code></pre>");
+
+        // Inline code  (`…`)
+        html = Regex.Replace(html, @"`([^`]+)`", "<code>$1</code>");
+
+        // Headers
+        html = Regex.Replace(html, @"^### (.+)$", "<h4>$1</h4>", RegexOptions.Multiline);
+        html = Regex.Replace(html, @"^## (.+)$",  "<h3>$1</h3>",  RegexOptions.Multiline);
+        html = Regex.Replace(html, @"^# (.+)$",   "<h2>$1</h2>",  RegexOptions.Multiline);
+
+        // Bold  (**…**)
+        html = Regex.Replace(html, @"\*\*([^*]+)\*\*", "<strong>$1</strong>");
+
+        // Italic  (*…*) — only match single asterisks (not preceded/followed by another *)
+        html = Regex.Replace(html, @"(?<!\*)\*([^*\n]+)\*(?!\*)", "<em>$1</em>");
+
+        // Unordered list items  (- …)
+        html = Regex.Replace(html, @"^- (.+)$", "<li>$1</li>", RegexOptions.Multiline);
+        html = Regex.Replace(html, @"((?:<li>.*</li>\n?)+)", "<ul>$1</ul>", RegexOptions.Singleline);
+
+        // Paragraphs
+        html = html.Replace("\n\n", "</p><p>");
+        html = html.Replace("\n",   "<br>");
+
+        if (!html.StartsWith('<'))
+            html = "<p>" + html + "</p>";
+
+        // Remove empty paragraphs and strip <p> wrappers around block elements
+        html = html.Replace("<p></p>", "");
+        html = Regex.Replace(html, @"<p>(<(?:h[234]|ul|pre)>)", "$1");
+        html = Regex.Replace(html, @"(</(?:h[234]|ul|pre)>)</p>", "$1");
+
+        return html;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _cts.Cancel();
+        _cts.Dispose();
+        if (_module is not null)
+            await _module.DisposeAsync();
+    }
+}

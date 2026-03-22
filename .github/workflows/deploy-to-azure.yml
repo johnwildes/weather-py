@@ -141,3 +141,15 @@ jobs:
                 "AzureOpenAI__Deployment=${{ secrets.AZURE_OPENAI_DEPLOYMENT }}" \
                 "AzureOpenAI__ApiVersion=2024-10-21"
           fi
+
+      # Blazor Server uses a persistent SignalR circuit that must stay on the
+      # same replica for the lifetime of the browser session. Without sticky
+      # sessions, requests can be routed to a different replica that has no
+      # record of the circuit, silently preventing interactive components
+      # (search box, theme toggle, etc.) from connecting.
+      - name: Enable sticky sessions for Blazor Container App
+        run: |
+          az containerapp ingress sticky-sessions set \
+            --name "$BLAZOR_APP_NAME" \
+            --resource-group "$RESOURCE_GROUP" \
+            --affinity sticky

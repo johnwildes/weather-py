@@ -44,6 +44,12 @@ jobs:
             fi
           done
 
+          # Warn (but don't fail) if the WeatherAPI key is absent — the app will
+          # start but weather data will be unavailable.
+          if [ -z "${{ secrets.WEATHER_API_KEY }}" ]; then
+            echo "WARNING: WEATHER_API_KEY secret is not set. Weather data will not be available."
+          fi
+
       - name: Log in to Azure
         uses: azure/login@v2
         with:
@@ -69,6 +75,7 @@ jobs:
             --resource-group "$RESOURCE_GROUP" \
             --image "$PYTHON_IMAGE" \
             --set-env-vars \
+              "WEATHER_API_KEY=${{ secrets.WEATHER_API_KEY }}" \
               "AZURE_OPENAI_API_KEY=${{ secrets.AZURE_OPENAI_API_KEY }}" \
               "AZURE_OPENAI_ENDPOINT=${{ secrets.AZURE_OPENAI_ENDPOINT }}" \
               "AZURE_OPENAI_DEPLOYMENT=${{ secrets.AZURE_OPENAI_DEPLOYMENT }}" \

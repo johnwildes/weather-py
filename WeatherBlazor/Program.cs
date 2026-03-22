@@ -1,6 +1,7 @@
 using WeatherBlazor.Components;
 using WeatherBlazor.Services;
 using Microsoft.FluentUI.AspNetCore.Components;
+using Microsoft.AspNetCore.HttpOverrides;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,7 +19,25 @@ builder.Services.AddHttpClient<IWeatherService, WeatherApiService>();
 builder.Services.AddHttpClient<IAIService, AzureOpenAIService>();
 builder.Services.AddScoped<ChatStateService>();
 
+// Trust the Azure Container Apps ingress proxy so the app sees the real
+// scheme (https) and client IP rather than the internal HTTP connection.
+// Without this, Blazor Server's antiforgery check rejects the SignalR
+// circuit negotiate request (Origin: https vs server-perceived http),
+// preventing the interactive circuit from connecting.
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // Azure Container Apps' proxy IPs are not fixed, so clear the default
+    // trusted-networks allowlist to accept forwarded headers from any proxy.
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
+
 var app = builder.Build();
+
+// Must be first — populates Request.Scheme / RemoteIpAddress from
+// X-Forwarded-Proto / X-Forwarded-For before any other middleware runs.
+app.UseForwardedHeaders();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

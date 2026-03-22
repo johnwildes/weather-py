@@ -75,8 +75,8 @@ jobs:
             --resource-group "$RESOURCE_GROUP" \
             --image "$PYTHON_IMAGE" \
             --set-env-vars \
-              "WEATHER_API_KEY=${{ secrets.WEATHER_API_KEY }}" \
-              "AZURE_OPENAI_API_KEY=${{ secrets.AZURE_OPENAI_API_KEY }}" \
+              "WEATHER_API_KEY=secretref:weatherapikey" \
+              "AZURE_OPENAI_API_KEY=secretref:azure-open-ai-key" \
               "AZURE_OPENAI_ENDPOINT=${{ secrets.AZURE_OPENAI_ENDPOINT }}" \
               "AZURE_OPENAI_DEPLOYMENT=${{ secrets.AZURE_OPENAI_DEPLOYMENT }}" \
               "AZURE_OPENAI_API_VERSION=2024-10-21"
@@ -124,11 +124,11 @@ jobs:
               --resource-group "$RESOURCE_GROUP" \
               --image "$BLAZOR_IMAGE" \
               --set-env-vars \
-                "WeatherApiKey=${{ secrets.WEATHER_API_KEY }}" \
-                "AzureOpenAI__ApiKey=${{ secrets.AZURE_OPENAI_API_KEY }}" \
-                "AzureOpenAI__Endpoint=${{ secrets.AZURE_OPENAI_ENDPOINT }}" \
-                "AzureOpenAI__Deployment=${{ secrets.AZURE_OPENAI_DEPLOYMENT }}" \
-                "AzureOpenAI__ApiVersion=2024-10-21"
+              "WEATHER_API_KEY=secretref:weatherapikey" \
+              "AZURE_OPENAI_API_KEY=secretref:azure-open-ai-key" \
+              "AZURE_OPENAI_ENDPOINT=${{ secrets.AZURE_OPENAI_ENDPOINT }}" \
+              "AZURE_OPENAI_DEPLOYMENT=${{ secrets.AZURE_OPENAI_DEPLOYMENT }}" \
+              "AZURE_OPENAI_API_VERSION=2024-10-21"
           else
             echo "Creating new Blazor Container App: $BLAZOR_APP_NAME"
             az containerapp create \
@@ -142,11 +142,11 @@ jobs:
               --registry-username "$GHCR_USERNAME" \
               --registry-password "$GHCR_PAT" \
               --env-vars \
-                "WeatherApiKey=${{ secrets.WEATHER_API_KEY }}" \
-                "AzureOpenAI__ApiKey=${{ secrets.AZURE_OPENAI_API_KEY }}" \
-                "AzureOpenAI__Endpoint=${{ secrets.AZURE_OPENAI_ENDPOINT }}" \
-                "AzureOpenAI__Deployment=${{ secrets.AZURE_OPENAI_DEPLOYMENT }}" \
-                "AzureOpenAI__ApiVersion=2024-10-21"
+              "WEATHER_API_KEY=secretref:weatherapikey" \
+              "AZURE_OPENAI_API_KEY=secretref:azure-open-ai-key" \
+              "AZURE_OPENAI_ENDPOINT=${{ secrets.AZURE_OPENAI_ENDPOINT }}" \
+              "AZURE_OPENAI_DEPLOYMENT=${{ secrets.AZURE_OPENAI_DEPLOYMENT }}" \
+              "AZURE_OPENAI_API_VERSION=2024-10-21"
           fi
 
       # Blazor Server uses a persistent SignalR circuit that must stay on the

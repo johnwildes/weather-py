@@ -1,0 +1,59 @@
+# Dockerfile.blazor — Multi-stage container build for the WeatherBlazor Blazor Server app.
+#
+# Build context: repository root (docker build -f Dockerfile.blazor .)
+#
+# Stage 1 (build):  Restore NuGet packages and publish a Release build.
+# Stage 2 (runtime): Copy the published artefacts into a slim ASP.NET runtime image.
+#
+# Example build command:
+#   docker build -f Dockerfile.blazor -t weather-blazor:latest .
+#
+# Example run command:
+#   docker run -p 8080:80 \
+#     -e WeatherApiKey=<your_key> \
+#     -e AzureOpenAI__ApiKey=<key> \
+#     -e AzureOpenAI__Endpoint=<endpoint> \
+#     -e AzureOpenAI__Deployment=<deployment> \
+#     weather-blazor:latest
+
+# ──────────────────────────────────────────────────
+# Stage 1 – Build
+# ──────────────────────────────────────────────────
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+
+WORKDIR /src
+
+# Copy only the project file first so Docker can cache the restore layer
+# independently of source-code changes.
+COPY WeatherBlazor/WeatherBlazor.csproj WeatherBlazor/
+RUN dotnet restore WeatherBlazor/WeatherBlazor.csproj
+
+# Copy the remaining source and publish a self-contained Release build.
+COPY WeatherBlazor/ WeatherBlazor/
+WORKDIR /src/WeatherBlazor
+RUN dotnet publish WeatherBlazor.csproj \
+    -c Release \
+    -o /app/publish \
+    --no-restore
+
+# ──────────────────────────────────────────────────
+# Stage 2 – Runtime image
+# ──────────────────────────────────────────────────
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
+
+WORKDIR /app
+
+# Expose port 80 for the Azure Container Apps ingress.
+EXPOSE 80
+
+# Tell ASP.NET Core to listen on HTTP port 80.
+# Azure Container Apps terminates TLS at the ingress layer,
+# so HTTPS redirection is handled externally.
+ENV ASPNETCORE_URLS=http://+:80
+ENV ASPNETCORE_ENVIRONMENT=Production
+
+# Copy the published artefacts from the build stage.
+COPY --from=build /app/publish .
+
+# Run the Blazor Server application.
+ENTRYPOINT ["dotnet", "WeatherBlazor.dll"]

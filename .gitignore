@@ -29,38 +29,7 @@ build/
 # Ignore Node.js dependencies
 node_modules/
 
-# .NET build artifacts
-bin/
+# .NET / C# build artefacts
 obj/
-out/
-publish/
-
-# .NET NuGet
-*.nupkg
-*.snupkg
-packages/
-.nuget/
-
-# .NET user/local files
+bin/
 *.user
-*.suo
-*.userosscache
-*.userprefs
-
-# Visual Studio local cache/settings
-.vs/
-
-# .NET test results & coverage
-TestResults/
-coverage/
-*.coverage
-*.coveragexml
-*.trx
-BenchmarkDotNet.Artifacts/
-
-# .NET secrets (use Secret Manager instead)
-**/secrets.json
-**/appsettings.Development.json
-
-# Blazor/WASM specific
-**/wwwroot/lib/

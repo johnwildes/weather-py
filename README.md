@@ -158,7 +158,54 @@ The debug panel provides:
 
 ## Deployment
 
-This project includes a GitHub Actions workflow (`.github/workflows/deploy-to-azure.yml`) for deploying to Azure Container Apps. Ensure the required secrets are configured in your repository.
+This project includes a GitHub Actions workflow (`.github/workflows/deploy-to-azure.yml`) that deploys **both** the Python/Flask app and the Blazor Server app to Azure Container Apps on every push to `master`.
+
+### Python / Flask App
+
+The existing `Dockerfile` builds the Flask app. It is deployed to the Azure Container App specified by the `CONTAINER_APP_NAME` repository secret.
+
+### Blazor Server App (`WeatherBlazor/`)
+
+The `Dockerfile.blazor` file contains the multi-stage build definition for the .NET 10 Blazor Server application located in `WeatherBlazor/`.
+
+#### Building the Blazor container locally
+
+```bash
+# Build the image (run from the repository root)
+docker build -f Dockerfile.blazor -t weather-blazor:latest .
+
+# Run the container locally
+docker run -p 8080:80 \
+  -e WeatherApiKey=your_weather_api_key \
+  -e AzureOpenAI__ApiKey=your_openai_key \
+  -e AzureOpenAI__Endpoint=your_openai_endpoint \
+  -e AzureOpenAI__Deployment=your_deployment_name \
+  weather-blazor:latest
+# Visit http://localhost:8080
+```
+
+#### CI/CD — Blazor deployment
+
+The `build-and-deploy-blazor` job in the workflow builds and pushes the Blazor image to GitHub Container Registry as `weather-blazor:latest`, then deploys it to a **separate** Azure Container App (distinct from the Python app) so Azure generates a unique URL for the Blazor front-end.
+
+On first run the job **creates** the Container App; subsequent runs **update** it.
+
+#### Required repository secrets for the Blazor job
+
+| Secret | Description |
+|---|---|
+| `AZURE_CLIENT_ID` | Azure service-principal / app registration client ID (shared) |
+| `AZURE_TENANT_ID` | Azure AD tenant ID (shared) |
+| `AZURE_SUB_ID` | Azure subscription ID (shared) |
+| `GHCR_USERNAME` | GitHub username for GHCR authentication (shared) |
+| `GHCR_PAT` | GitHub personal access token with `write:packages` scope (shared) |
+| `RESOURCE_GROUP` | Azure resource group name (shared) |
+| `CONTAINER_APP_ENVIRONMENT` | Name of the existing Azure Container Apps managed environment (shared) |
+| `BLAZOR_CONTAINER_APP_NAME` | **New** — unique name for the Blazor Container App (e.g. `weather-blazor`) |
+| `WEATHER_API_KEY` | **New** — API key for [weatherapi.com](https://www.weatherapi.com/) |
+| `AZURE_OPENAI_API_KEY` | Azure OpenAI API key (shared) |
+| `AZURE_OPENAI_ENDPOINT` | Azure OpenAI endpoint URL (shared) |
+| `AZURE_OPENAI_DEPLOYMENT` | Azure OpenAI deployment/model name (shared) |
 
 ## License
 

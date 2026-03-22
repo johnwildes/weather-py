@@ -49,8 +49,17 @@ if (!app.Environment.IsDevelopment())
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 
+// Serve wwwroot files (including _framework/blazor.web.js) as middleware so
+// they are delivered before endpoint routing runs.  MapStaticAssets() is
+// endpoint-based and, in some production Docker configurations, fails to match
+// the non-fingerprinted _framework/ routes — resulting in a 404 for
+// blazor.web.js that prevents the Blazor circuit from ever starting.
+app.UseStaticFiles();
+
 app.UseAntiforgery();
 
+// MapStaticAssets handles fingerprinted asset URLs (long-lived cache headers).
+// UseStaticFiles above handles the remaining wwwroot files as a middleware fallback.
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

@@ -29,7 +29,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
     // Azure Container Apps' proxy IPs are not fixed, so clear the default
     // trusted-networks allowlist to accept forwarded headers from any proxy.
-    options.KnownNetworks.Clear();
+    options.KnownIPNetworks.Clear();
     options.KnownProxies.Clear();
 });
 
@@ -46,20 +46,14 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
-app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
-
-// Serve wwwroot files (including _framework/blazor.web.js) as middleware so
-// they are delivered before endpoint routing runs.  MapStaticAssets() is
-// endpoint-based and, in some production Docker configurations, fails to match
-// the non-fingerprinted _framework/ routes — resulting in a 404 for
-// blazor.web.js that prevents the Blazor circuit from ever starting.
-app.UseStaticFiles();
 
 app.UseAntiforgery();
 
-// MapStaticAssets handles fingerprinted asset URLs (long-lived cache headers).
-// UseStaticFiles above handles the remaining wwwroot files as a middleware fallback.
+// MapStaticAssets serves all static files (wwwroot, _framework, _content)
+// using a fingerprinted manifest.  Do NOT add UseStaticFiles() — in .NET 10
+// it conflicts with MapStaticAssets for _framework/ paths, causing
+// blazor.web.js to 404 (see dotnet/aspnetcore#64381).
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();

@@ -148,6 +148,7 @@ jobs:
               --registry-password "$GHCR_PAT" \
               --secrets \
                 "weatherapikey=${{ secrets.API_KEY_WEATHER }}" \
+                "azure-open-ai-key=${{ secrets.AZURE_OPENAI_API_KEY }}" \
               --env-vars \
               "WEATHER_API_KEY=secretref:weatherapikey" \
               "AZURE_OPENAI_API_KEY=secretref:azure-open-ai-key" \

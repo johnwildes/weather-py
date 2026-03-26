@@ -141,6 +141,7 @@ jobs:
               --resource-group "$RESOURCE_GROUP" \
               --environment "$MANAGED_ENVIRONMENT_ID" \
               --image "$BLAZOR_IMAGE" \
+              --runtime dotnet \
               --target-port 80 \
               --ingress external \
               --registry-server ghcr.io \

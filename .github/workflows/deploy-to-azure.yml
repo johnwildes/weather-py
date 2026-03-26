@@ -149,19 +149,11 @@ jobs:
               --secrets \
                 "weatherapikey=${{ secrets.API_KEY_WEATHER }}" \
               --env-vars \
-<<<<<<< HEAD
               "WEATHER_API_KEY=secretref:weatherapikey" \
               "AZURE_OPENAI_API_KEY=secretref:azure-open-ai-key" \
               "AZURE_OPENAI_ENDPOINT=${{ secrets.AZURE_OPENAI_ENDPOINT }}" \
               "AZURE_OPENAI_DEPLOYMENT=${{ secrets.AZURE_OPENAI_DEPLOYMENT }}" \
               "AZURE_OPENAI_API_VERSION=2024-10-21"
-=======
-                "WeatherApiKey=secretref:weatherapikey" \
-                "AzureOpenAI__ApiKey=${{ secrets.AZURE_OPENAI_API_KEY }}" \
-                "AzureOpenAI__Endpoint=${{ secrets.AZURE_OPENAI_ENDPOINT }}" \
-                "AzureOpenAI__Deployment=${{ secrets.AZURE_OPENAI_DEPLOYMENT }}" \
-                "AzureOpenAI__ApiVersion=2024-10-21"
->>>>>>> dd849c3 (Update workflow to properly create secretref on container app)
           fi
 
       # Blazor Server uses a persistent SignalR circuit that must stay on the
